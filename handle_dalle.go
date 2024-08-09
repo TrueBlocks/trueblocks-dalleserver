@@ -16,7 +16,9 @@ var isDebugging = false
 func (a *App) handleDalleDress(w http.ResponseWriter, r *http.Request) {
 	a.Logger.Printf("Received request: %s %s", r.Method, r.URL.Path)
 	req, err := a.parseRequest(r)
+    a.Logger.Printf("Req: %s", req.String())
 	if err != nil {
+        a.Logger.Printf("Err: %s", err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -36,6 +38,8 @@ func (req *Request) Respond(w io.Writer, r *http.Request) {
 	}
 
 	// If the file already exists and we're not told to generate it, serve it
+    a.Logger.Println("exists:", exist)
+    a.Logger.Println("generate:", req.generate)
 	if exists && !req.generate {
 		rw, ok := w.(http.ResponseWriter)
 		if ok {

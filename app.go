@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+    "encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -43,6 +44,11 @@ type Request struct {
 	address  string
 	generate bool
 	remove   bool
+}
+
+func (r *Request) String() string {
+    bytes, _ := json.MarshalIndent(r, "", "  ")
+    return string(bytes)
 }
 
 func (a *App) parseRequest(r *http.Request) (Request, error) {
