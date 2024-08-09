@@ -1,8 +1,8 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-    "encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -44,11 +44,12 @@ type Request struct {
 	address  string
 	generate bool
 	remove   bool
+	app      *App
 }
 
 func (r *Request) String() string {
-    bytes, _ := json.MarshalIndent(r, "", "  ")
-    return string(bytes)
+	bytes, _ := json.MarshalIndent(r, "", "  ")
+	return string(bytes)
 }
 
 func (a *App) parseRequest(r *http.Request) (Request, error) {
@@ -85,5 +86,6 @@ func (a *App) parseRequest(r *http.Request) (Request, error) {
 		address:  address,
 		generate: generate,
 		remove:   remove,
+		app:      a,
 	}, nil
 }
