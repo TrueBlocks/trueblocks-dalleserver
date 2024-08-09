@@ -93,7 +93,7 @@ func annotate(text, fileName, location string, annoPct float64) (ret string, err
 	// 	return "", err
 	// }
 
-	// return outputPath, nil
+	return outputPath, nil
 }
 
 // darkenColor slightly darkens a given color.
