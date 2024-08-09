@@ -4,16 +4,11 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"image/draw"
-	"image/png"
-	"log"
-	"math"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
 
-	"git.sr.ht/~sbinet/gg"
+	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/file"
 	"github.com/lucasb-eyer/go-colorful"
 )
 
@@ -22,80 +17,83 @@ import (
 // an appropriately colored background and rendered in a text color that
 // ensures good contrast and readability.
 func annotate(text, fileName, location string, annoPct float64) (ret string, err error) {
-	file, err := os.Open(fileName)
-	if err != nil {
-		return "", err
-	}
-	defer file.Close()
-
-	img, _, err := image.Decode(file)
-	if err != nil {
-		return "", err
-	}
-
-	width := img.Bounds().Dx()
-	height := img.Bounds().Dy()
-
-	lenText := len(text)
-	estimatedFontSize := 30. * (float64(width) / float64(lenText*7.))
-
-	textWidth := float64(width) * 0.95
-	lines := math.Ceil(float64(lenText) / (textWidth / estimatedFontSize))
-	marginHeight := float64(height) * 0.025
-	annoHeight := lines * estimatedFontSize * 1.5
-	newHeight := height + int(annoHeight+marginHeight*2)
-
-	newImg := image.NewRGBA(image.Rect(0, 0, width, newHeight))
-	draw.Draw(newImg, newImg.Bounds(), img, img.Bounds().Min, draw.Src)
-
-	bgColor, _ := findAverageDominantColor(img)
-	col, err := parseHexColor(bgColor)
-	if err != nil {
-		return "", err
-	}
-
-	bgRect := image.Rect(0, height, width, newHeight)
-	if location == "top" {
-		bgRect = image.Rect(0, 0, width, int(annoHeight+marginHeight*2))
-		draw.Draw(newImg, bgRect, &image.Uniform{col}, image.Point{}, draw.Src)
-	} else {
-		draw.Draw(newImg, bgRect, &image.Uniform{col}, image.Point{}, draw.Src)
-	}
-
-	gc := gg.NewContextForImage(newImg)
-	if err := gc.LoadFontFace("/System/Library/Fonts/Monaco.ttf", estimatedFontSize); err != nil {
-		log.Fatalf("Error loading font: %v", err) // Handle the error appropriately
-	}
-	borderCol := darkenColor(col)
-	gc.SetColor(borderCol)
-	gc.SetLineWidth(2)
-	if location == "top" {
-		gc.DrawLine(0, float64(height)*annoPct, float64(width), float64(height)*annoPct)
-	} else {
-		gc.DrawLine(0, float64(height), float64(width), float64(height))
-	}
-	gc.Stroke()
-
-	// Draw the text with adjusted margins.
-	textColor, _ := contrastColor(col)
-
-	gc.SetColor(textColor) // use the contrasting color for the text
-	gc.DrawStringWrapped(text, float64(width)/2, float64(height)+marginHeight*2, 0.5, 0.35, textWidth, 1.5, gg.AlignLeft)
-
-	// Save the new image.
 	outputPath := strings.Replace(fileName, "generated/", "annotated/", -1)
-	out, err := os.Create(outputPath)
-	if err != nil {
-		return "", err
-	}
-	defer out.Close()
+	file.Copy(outputPath, fileName)
 
-	err = png.Encode(out, gc.Image())
-	if err != nil {
-		return "", err
-	}
+	// file, err := os.Open(fileName)
+	// if err != nil {
+	// 	return "", err
+	// }
+	// defer file.Close()
 
-	return outputPath, nil
+	// img, _, err := image.Decode(file)
+	// if err != nil {
+	// 	return "", err
+	// }
+
+	// width := img.Bounds().Dx()
+	// height := img.Bounds().Dy()
+
+	// lenText := len(text)
+	// estimatedFontSize := 30. * (float64(width) / float64(lenText*7.))
+
+	// textWidth := float64(width) * 0.95
+	// lines := math.Ceil(float64(lenText) / (textWidth / estimatedFontSize))
+	// marginHeight := float64(height) * 0.025
+	// annoHeight := lines * estimatedFontSize * 1.5
+	// newHeight := height + int(annoHeight+marginHeight*2)
+
+	// newImg := image.NewRGBA(image.Rect(0, 0, width, newHeight))
+	// draw.Draw(newImg, newImg.Bounds(), img, img.Bounds().Min, draw.Src)
+
+	// bgColor, _ := findAverageDominantColor(img)
+	// col, err := parseHexColor(bgColor)
+	// if err != nil {
+	// 	return "", err
+	// }
+
+	// bgRect := image.Rect(0, height, width, newHeight)
+	// if location == "top" {
+	// 	bgRect = image.Rect(0, 0, width, int(annoHeight+marginHeight*2))
+	// 	draw.Draw(newImg, bgRect, &image.Uniform{col}, image.Point{}, draw.Src)
+	// } else {
+	// 	draw.Draw(newImg, bgRect, &image.Uniform{col}, image.Point{}, draw.Src)
+	// }
+
+	// gc := gg.NewContextForImage(newImg)
+	// if err := gc.LoadFontFace("/System/Library/Fonts/Monaco.ttf", estimatedFontSize); err != nil {
+	// 	log.Fatalf("Error loading font: %v", err) // Handle the error appropriately
+	// }
+	// borderCol := darkenColor(col)
+	// gc.SetColor(borderCol)
+	// gc.SetLineWidth(2)
+	// if location == "top" {
+	// 	gc.DrawLine(0, float64(height)*annoPct, float64(width), float64(height)*annoPct)
+	// } else {
+	// 	gc.DrawLine(0, float64(height), float64(width), float64(height))
+	// }
+	// gc.Stroke()
+
+	// // Draw the text with adjusted margins.
+	// textColor, _ := contrastColor(col)
+
+	// gc.SetColor(textColor) // use the contrasting color for the text
+	// gc.DrawStringWrapped(text, float64(width)/2, float64(height)+marginHeight*2, 0.5, 0.35, textWidth, 1.5, gg.AlignLeft)
+
+	// // Save the new image.
+	// outputPath := strings.Replace(fileName, "generated/", "annotated/", -1)
+	// out, err := os.Create(outputPath)
+	// if err != nil {
+	// 	return "", err
+	// }
+	// defer out.Close()
+
+	// err = png.Encode(out, gc.Image())
+	// if err != nil {
+	// 	return "", err
+	// }
+
+	// return outputPath, nil
 }
 
 // darkenColor slightly darkens a given color.
