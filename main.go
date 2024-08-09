@@ -16,7 +16,7 @@ func main() {
 	app.StartLogging()
 	defer app.StopLogging()
 
-	http.HandleFunc("/", app.handleDefault)
+	http.HandleFunc("/{$}", app.handleDefault)
 	http.HandleFunc("/dalle/", app.handleDalleDress)
 	http.HandleFunc("/series", app.handleSeries)
 	http.HandleFunc("/series/", app.handleSeries)
