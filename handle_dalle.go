@@ -2,76 +2,62 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 
-	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/base"
-	"github.com/TrueBlocks/trueblocks-dalleserver/dd"
+	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/file"
+	"github.com/TrueBlocks/trueblocks-dalleserver/pkg/dd"
 )
 
-type App struct {
-	ValidSeries []string
-}
-
-func NewApp() *App {
-	app := App{}
-	app.ValidSeries = dd.SeriesList()
-	return &app
-}
+var isDebugging = false
 
 func (a *App) handleDalleDress(w http.ResponseWriter, r *http.Request) {
-	filePath, series, address, generate, err := a.parseRequest(r)
+	a.Logger.Printf("Received request: %s %s", r.Method, r.URL.Path)
+	req, err := a.parseRequest(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	req.Respond(w, r)
+}
 
-	// If the file already exists and we're not being forced to generate, serve it
-	if _, err := os.Stat(filePath); err == nil && !generate {
-		http.ServeFile(w, r, filePath)
+func (req *Request) Respond(w io.Writer, r *http.Request) {
+	exists := file.FileExists(req.filePath)
+	if req.remove {
+		if !exists {
+			fmt.Fprintln(w, "Image not found")
+			return
+		}
+		os.Remove(req.filePath)
+		fmt.Fprintln(w, "Image removed")
 		return
 	}
 
-	// If the file is currently being generated, return a waiting message
-	lockFilePath := filepath.Join("./pending", series+"-"+address+".lck")
-	if _, err := os.Stat(lockFilePath); err == nil {
-		fmt.Fprintln(w, "Your image will be ready in", dd.Waiting, "seconds")
-		return
+	// If the file already exists and we're not told to generate it, serve it
+	if exists && !req.generate {
+		rw, ok := w.(http.ResponseWriter)
+		if ok {
+			http.ServeFile(rw, r, req.filePath)
+			return
+		}
+	}
+
+	if !isDebugging {
+		// If the file is currently being generated, return a waiting message
+		lockFilePath := filepath.Join("./pending", req.series+"-"+req.address+".lck")
+		if _, err := os.Stat(lockFilePath); err == nil {
+			fmt.Fprintln(w, "Your image will be ready shortly")
+			return
+		}
 	}
 
 	// Otherwise, kick off a generation job and return a waiting message
-	go dd.CreateDalleDress(series, address, filePath)
-	fmt.Fprintln(w, "Your image will be ready in", dd.Waiting, "seconds")
-}
-
-func (a *App) parseRequest(r *http.Request) (string, string, string, bool, error) {
-	path := strings.TrimPrefix(r.URL.Path, "/dalle/")
-
-	segments := strings.SplitN(path, "/", 2)
-	if len(segments) < 2 {
-		return "", "", "", false, fmt.Errorf("invalid request: %s", r.URL.Path)
+	if isDebugging {
+		dd.CreateDalleDress(req.series, req.address, req.filePath)
+	} else {
+		go dd.CreateDalleDress(req.series, req.address, req.filePath)
 	}
-
-	series := segments[0]
-	if len(series) == 0 {
-		return "", "", "", false, fmt.Errorf("series is required")
-	}
-	if !dd.IsValidSeries(series, a.ValidSeries) {
-		return "", "", "", false, fmt.Errorf("invalid series")
-	}
-
-	address := segments[1]
-	if len(address) == 0 {
-		return "", "", "", false, fmt.Errorf("address is required")
-	}
-	if !base.IsValidAddress(address) {
-		return "", "", "", false, fmt.Errorf("invalid address")
-	}
-
-	generate := r.URL.Query().Has("generate")
-
-	filePath := filepath.Join("./output", series, address+".png")
-	return filePath, series, address, generate, nil
+	fmt.Fprintln(w, "Your image will be ready shortly")
 }

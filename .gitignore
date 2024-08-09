@@ -1,3 +1,4 @@
+server.log
 *.exe
 *.exe~
 *.dll
@@ -11,6 +12,7 @@ go.work.sum
 
 x
 shit*
+junk*
 
 .vscode/*
 !.vscode/settings.json

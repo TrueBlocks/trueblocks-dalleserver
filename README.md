@@ -1,3 +1,5 @@
+# DalleDress - Better Blockies Through Science
+
 ## trueblocks-dalleserver
 
 ### Install latest [GoLang](https://go.dev/doc/install)
@@ -48,15 +50,28 @@ In another terminal window:
 open http://localhost:8080/simple/0xf503017d7baf7fbc0fff7492b751025c6a78179b
 ```
 
-Keep hitting reload until the image appears.
+While the image is being generated, you will be told to return soon. When the image is ready, it will be returned. You can check the response's `Content-Type` to see if the image is ready.
 
 ### Listing available series
 
-To show all available series, run this
+A `series` is a filter on the databases used to create an image. The simplest series (one with no filter that therefore uses all the databases) is called `simple`. To see all the available series, use the following command:
 
 ```[bash]
 open http://localhost:8080/series
 ```
+
+This should return a string list similar to this:
+
+```
+Available series:  [
+  ...
+  "five-tone-postal-protozoa",
+  "happy-punk-cats",
+  ...
+]
+```
+
+`five-time-postal-protozoa` limits the databases to `protozoa` who are going `postal` using an artistic style of `five-tone` pencil drawing. `happy-punk-cats` does as you might expect.
 
 ## Contributing
 
