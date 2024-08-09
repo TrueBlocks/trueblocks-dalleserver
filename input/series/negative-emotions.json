@@ -1,0 +1,28 @@
+{
+  "suffix": "negative-emotions",
+  "adverbs": [],
+  "adjectives": [],
+  "nouns": [],
+  "emotions": [
+    "anger",
+    "anxiety",
+    "confusion",
+    "discontentment",
+    "disgust",
+    "fear",
+    "irritation",
+    "sadness",
+    "shame"
+  ],
+  "occupations": [],
+  "actions": null,
+  "artstyles": [],
+  "litstyles": [
+    "fairy",
+    "science"
+  ],
+  "colors": [],
+  "orientations": null,
+  "gazes": null,
+  "backstyles": null
+}
