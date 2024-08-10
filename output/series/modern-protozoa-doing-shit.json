@@ -1,5 +1,5 @@
 {
-  "suffix": "abstract-protozoa-doing-shit-optimism-blocks-120",
+  "suffix": "modern-protozoa-doing-shit",
   "adverbs": [
     "ly,"
   ],
@@ -27,15 +27,23 @@
     "trypanosomatida"
   ],
   "emotions": [
-    ",negative,"
+    "fury",
+    "postal",
+    "rage"
   ],
   "occupations": [],
   "actions": [],
   "artstyles": [
-    "abstract"
+    "five-tone"
   ],
   "litstyles": [],
-  "colors": [],
+  "colors": [
+    "black",
+    "white",
+    "grey",
+    "gray",
+    "indego"
+  ],
   "orientations": [],
   "gazes": [],
   "backstyles": []

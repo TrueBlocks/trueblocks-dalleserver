@@ -6,6 +6,6 @@
   "author": "Thomas Jay Rush <jrush@quickblocks.io>",
   "license": "MIT",
   "scripts": {
-    "start": "go run main.go app.go handle*.go $1"
+    "start": "rm -f pending/* && go run main.go app.go handle*.go $1"
   }
 }

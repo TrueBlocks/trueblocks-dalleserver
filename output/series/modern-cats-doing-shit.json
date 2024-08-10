@@ -1,5 +1,5 @@
 {
-  "suffix": "punky-cats-doing-shit-optimism-blocks-10",
+  "suffix": "modern-cats-doing-shit",
   "adverbs": [
     "ly,"
   ],
@@ -15,21 +15,17 @@
   "occupations": [],
   "actions": [],
   "artstyles": [
-    "clockpunk",
-    "cyberpunk",
-    "decopunk",
-    "dieselpunk",
-    "nanopunk",
-    "solarpunk",
-    "steampunk",
-    "teslapunk"
+    "futurism,modern",
+    "modernism,modern",
+    "painting,modern",
+    "realism,modern"
   ],
   "litstyles": [],
   "colors": [
-    "green",
-    "blue",
-    "orange",
     "yellow",
+    "orange",
+    "purple",
+    "blue",
     "white",
     "black",
     "grey"

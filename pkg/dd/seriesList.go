@@ -10,13 +10,13 @@ func SeriesList() []string {
 	seriesList := []string{}
 	vFunc := func(fn string, vP any) (bool, error) {
 		if strings.HasSuffix(fn, ".json") {
-			fn = strings.ReplaceAll(fn, "input/series/", "")
+			fn = strings.ReplaceAll(fn, "output/series/", "")
 			fn = strings.ReplaceAll(fn, ".json", "")
 			seriesList = append(seriesList, fn)
 		}
 		return true, nil
 	}
-	_ = walk.ForEveryFileInFolder("./input/series", vFunc, nil)
+	_ = walk.ForEveryFileInFolder("./output/series", vFunc, nil)
 	return seriesList
 }
 
