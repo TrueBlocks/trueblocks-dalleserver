@@ -227,7 +227,7 @@ func (maker *Maker) GenerateEnhanced(addr string) string {
 		if dd.EnhancedPrompt, err = openai.EnhancePrompt(maker.GetPrompt(addr), authorType); err != nil {
 			logger.Fatal(err.Error())
 		}
-		msg := " DO NOT PUT TEXT IN THE IMAGE. "
+		msg := "" // " DO NOT PUT TEXT IN THE IMAGE. "
 		dd.EnhancedPrompt = msg + dd.EnhancedPrompt + msg
 		return dd.EnhancedPrompt
 	}

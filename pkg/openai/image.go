@@ -34,11 +34,11 @@ func RequestImage(imageData *ImageData) error {
 	logger.Info(colors.Cyan, imageData.Filename, colors.Yellow, "- improving the prompt...", colors.Off)
 
 	size := "1024x1024"
-	if strings.Contains(imageData.EnhancedPrompt, "horizontal") {
-		size = "1792x1024"
-	} else if strings.Contains(imageData.EnhancedPrompt, "vertical") {
-		size = "1024x1792"
-	}
+	// if strings.Contains(imageData.EnhancedPrompt, "horizontal") {
+	// 	size = "1792x1024"
+	// } else if strings.Contains(imageData.EnhancedPrompt, "vertical") {
+	// 	size = "1024x1792"
+	// }
 
 	quality := "standard"
 	if os.Getenv("DALLE_QUALITY") != "" {
