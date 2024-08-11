@@ -222,10 +222,13 @@ func (dd *DalleDress) LitPrompt(short bool) string {
 	if val == "none" {
 		return ""
 	}
-	text := `Please give me a detailed rewrite of the following
-	prompt in the literary style ` + dd.LitStyle(short) + `. 
-	Be imaginative, creative, and complete.
-`
+	// 	text := `Please give me a detailed rewrite of the following
+	// 	prompt in the literary style ` + dd.LitStyle(short) + `.
+	// 	Be imaginative, creative, and complete.
+	// `
+	text := `You are a world-class writer who practices primarily in the` +
+		dd.LitStyle(short) + ` and related literary styles. Be imaginative and
+	creative and rewrite the following prompt:`
 	return text
 }
 
