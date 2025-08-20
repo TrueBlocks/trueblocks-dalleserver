@@ -1,6 +1,39 @@
 all:
-	go build *.go
+	go build ./...
 
 run:
-	go run *.go
+	$(MAKE) -j 12 all
+	go run .
+
+lint:
+	golangci-lint run ./...
+
+test:
+	DALLESERVER_SKIP_IMAGE=1 go test ./...
+
+race:
+	DALLESERVER_SKIP_IMAGE=1 go test -race ./...
+
+bench:
+	DALLESERVER_SKIP_IMAGE=1 go test -bench=. -run=^$ ./...
+
+benchmark:
+	DALLESERVER_SKIP_IMAGE=1 go test -bench=BenchmarkGenerateAnnotatedImage -benchmem -run=^$ ./...
+
+
+bench-baseline:
+	@mkdir -p benchmarks
+	@ts=$$(date +%Y%m%d%H%M%S); \
+	  echo "Running benchmark (timestamp $$ts)..."; \
+	  DALLESERVER_SKIP_IMAGE=1 go test -bench=BenchmarkGenerateAnnotatedImage -benchmem -run=^$$ -count=1 -json ./... > benchmarks/$$ts.json; \
+	  cp benchmarks/$$ts.json benchmarks/latest.json; \
+	  echo "Saved benchmark baseline to benchmarks/$$ts.json and updated benchmarks/latest.json"
+
+clean-output:
+	rm -rf output/*/*/*.png output/*/annotated/*.png || true
+
+# Build & serve documentation book (mdBook) from ./book
+.PHONY: book
+book:
+	$(MAKE) -C book serve
 

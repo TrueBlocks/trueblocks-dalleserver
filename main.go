@@ -1,13 +1,16 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
 	"strings"
+	"syscall"
+	"time"
 
-	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/colors"
 	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/logger"
 )
 
@@ -16,17 +19,63 @@ func main() {
 	app.StartLogging()
 	defer app.StopLogging()
 
-	http.HandleFunc("/{$}", app.handleDefault)
-	http.HandleFunc("/dalle/", app.handleDalleDress)
-	http.HandleFunc("/series", app.handleSeries)
-	http.HandleFunc("/series/", app.handleSeries)
+	// Fail fast if required OpenAI key missing (before starting server)
+	if os.Getenv("OPENAI_API_KEY") == "" {
+		fmt.Fprintln(os.Stderr, "FATAL: OPENAI_API_KEY not set in environment (.env not loaded or missing). Exiting.")
+		os.Exit(1)
+	}
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/{$}", app.handleDefault)
+	mux.HandleFunc("/dalle/", app.handleDalleDress)
+	mux.HandleFunc("/series", app.handleSeries)
+	mux.HandleFunc("/series/", app.handleSeries)
+	mux.HandleFunc("/healthz", handleHealth)
+	mux.HandleFunc("/metrics", handleMetrics)
+	mux.HandleFunc("/preview", app.handlePreview)
+	// Static file server for browsing raw output (limited to annotated/ images via handler logic)
+	mux.Handle("/files/", http.StripPrefix("/files/", http.FileServer(http.Dir("output"))))
 
 	port := getPort()
-	fmt.Println("Starting server on", port)
-	if err := http.ListenAndServe(port, nil); err != nil {
-		fmt.Println("Error starting server:", err)
-		fmt.Println("Run with " + colors.BrightYellow + "--port=n" + colors.Off + ".")
+	srv := &http.Server{
+		Addr:              port,
+		Handler:           mux,
+		ReadHeaderTimeout: 10 * time.Second, // mitigates Slowloris (gosec G112)
+		ReadTimeout:       30 * time.Second,
+		WriteTimeout:      60 * time.Second,
+		IdleTimeout:       120 * time.Second,
 	}
+
+	// Graceful shutdown
+	go func() {
+		fmt.Println("Starting server on", port)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			fmt.Println("Server error:", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	fmt.Println("Shutdown signal received")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		fmt.Println("Graceful shutdown failed:", err)
+		_ = srv.Close()
+	}
+}
+
+// handleHealth provides a simple health probe.
+func handleHealth(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	_, _ = w.Write([]byte(`{"status":"ok"}`))
+}
+
+// handleMetrics exposes very basic counters (placeholder).
+func handleMetrics(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain; version=0.0.4")
+	_, _ = w.Write([]byte("dalleserver_up 1\n"))
 }
 
 func getPort() string {

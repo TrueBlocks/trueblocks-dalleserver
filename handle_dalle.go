@@ -5,13 +5,16 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"path/filepath"
+	"time"
 
 	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/file"
-	"github.com/TrueBlocks/trueblocks-dalleserver/pkg/dd"
+	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
 )
 
 var isDebugging = false
+
+// indirection for easier test injection of failures
+var generateAnnotatedImage = dalle.GenerateAnnotatedImage
 
 func (a *App) handleDalleDress(w http.ResponseWriter, r *http.Request) {
 	a.Logger.Printf("Received request: %s %s", r.Method, r.URL.Path)
@@ -32,7 +35,7 @@ func (req *Request) Respond(w io.Writer, r *http.Request) {
 			fmt.Fprintln(w, "Image not found")
 			return
 		}
-		os.Remove(req.filePath)
+		_ = os.Remove(req.filePath)
 		fmt.Fprintln(w, "Image removed")
 		return
 	}
@@ -50,18 +53,22 @@ func (req *Request) Respond(w io.Writer, r *http.Request) {
 	}
 
 	if !isDebugging {
-		// If the file is currently being generated, return a waiting message
-		lockFilePath := filepath.Join("./pending", req.series+"-"+req.address+".lck")
-		if _, err := os.Stat(lockFilePath); err == nil {
-			req.app.Logger.Println("the image is being generated")
-			fmt.Fprintln(w, "Your image will be ready shortly")
-			return
-		}
+		// Fire off async generation respecting in-memory lock
 		req.app.Logger.Println("calling the go routine to generate the image")
-		go dd.CreateDalleDress(req.series, req.address, req.filePath)
+		go func(series, addr, fp string) {
+			start := time.Now()
+			if _, err := generateAnnotatedImage(series, addr, "output", req.app.Config.SkipImage || os.Getenv("DALLESERVER_SKIP_IMAGE") == "1", req.app.Config.LockTTL); err != nil {
+				req.app.Logger.Println("error generating image:", err)
+			} else {
+				req.app.Logger.Printf("generated image for %s/%s in %s", series, addr, time.Since(start))
+			}
+		}(req.series, req.address, req.filePath)
 	} else {
-		dd.CreateDalleDress(req.series, req.address, req.filePath)
+		if _, err := generateAnnotatedImage(req.series, req.address, "output", req.app.Config.SkipImage || os.Getenv("DALLESERVER_SKIP_IMAGE") == "1", req.app.Config.LockTTL); err != nil {
+			req.app.Logger.Println("error generating image:", err)
+		}
 	}
 
 	fmt.Fprintln(w, "Your image will be ready shortly")
+
 }

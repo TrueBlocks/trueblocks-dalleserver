@@ -1,0 +1,11 @@
+[book]
+authors = ["TrueBlocks"]
+language = "en"
+multilingual = false
+src = "src"
+title = "trueblocks-dalleserver Book"
+
+[output.html]
+preferred-dark-theme = "ayu"
+additional-js = ["right-menu.js"]
+additional-css = ["right-menu.css"]

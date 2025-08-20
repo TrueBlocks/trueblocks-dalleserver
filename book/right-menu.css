@@ -1,0 +1,9 @@
+/* right-menu.css v20250820-2 (temp bright border to verify refresh) */
+.right-menu { position:fixed; top:80px; right:36px; width:170px; max-height:calc(100vh - 120px); overflow:auto; font-size:0.95rem; line-height:1.45; background:linear-gradient(180deg, var(--bg) 0%, var(--bg) 75%, rgba(0,128,255,0.08) 100%); border:2px solid #1e90ff; padding:0.65rem 0.7rem 0.85rem 0.7rem; border-radius:8px; box-shadow:0 2px 6px #0002; }
+.right-menu h3 { margin:0 0 .55rem 0; font-size:1.05rem; text-transform:uppercase; letter-spacing:.6px; opacity:.85; }
+.right-menu ul { list-style:none; margin:0; padding:0; }
+.right-menu li { margin:.3rem 0; }
+.right-menu a { color:var(--links,#0366d6); text-decoration:none; display:block; padding:4px 6px; border-radius:4px; font-weight:600; font-size:0.9rem; }
+.right-menu a:hover { background:var(--sidebar-bg,#f4f4f4); }
+.right-menu a.active { background:var(--sidebar-active,#0366d6); color:var(--sidebar-active-text,#fff); box-shadow:0 0 0 1px var(--sidebar-active,#0366d6) inset; }
+@media (max-width: 1349px){ .right-menu { display:none !important; } }

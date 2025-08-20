@@ -4,8 +4,10 @@
   "main": "index.js",
   "repository": "git@github.com:TrueBlocks/trueblocks-dalleserver.git",
   "author": "Thomas Jay Rush <jrush@quickblocks.io>",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "scripts": {
-    "start": "rm -f pending/* && go run main.go app.go handle*.go $1"
+    "start": "rm -f pending/* && go run .",
+    "serve": "rm -f pending/* && go run .",
+    "test": "go test ./..."
   }
 }

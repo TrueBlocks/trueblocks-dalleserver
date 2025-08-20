@@ -7,16 +7,20 @@ import (
 	"testing"
 )
 
-func TestMain(t *testing.T) {
+func TestMainRequestRespond(t *testing.T) {
+	_ = os.Setenv("DALLESERVER_SKIP_IMAGE", "1")
+	defer os.Unsetenv("DALLESERVER_SKIP_IMAGE")
 	cwd, _ := os.Getwd()
 	fmt.Println(cwd)
 	isDebugging = true
 	app := NewApp()
 	app.StartLogging()
 	defer app.StopLogging()
+	series := "simple"
+	addr := "0xf503017d7baf7fbc0fff7492b751025c6a78179b"
 	req := Request{
-		series:   "five-tone-postal-protozoa",
-		address:  "0xf503017d7baf7fbc0fff7492b751025c6a78179b",
+		series:   series,
+		address:  addr,
 		filePath: "testing",
 		generate: true,
 		app:      app,

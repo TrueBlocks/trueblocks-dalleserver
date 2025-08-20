@@ -10,32 +10,48 @@ import (
 	"strings"
 
 	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/base"
-	"github.com/TrueBlocks/trueblocks-dalleserver/pkg/dd"
+	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
+	"go.uber.org/zap"
 )
 
 type App struct {
 	ValidSeries []string
 	Logger      *log.Logger
 	LogFile     *os.File
+	SLogger     *zap.SugaredLogger
+	Config      Config
 }
 
 func NewApp() *App {
-	app := App{}
-	app.ValidSeries = dd.SeriesList()
+	app := App{Config: LoadConfig()}
+	app.ValidSeries = dalle.ListSeries("output")
 	return &app
 }
 
 func (a *App) StartLogging() {
 	var err error
-	a.LogFile, err = os.OpenFile("server.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	// Use restrictive permissions (0600) per gosec recommendation (was 0666)
+	a.LogFile, err = os.OpenFile("server.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 	if err != nil {
 		log.Fatalf("Failed to open log file: %v", err)
 	}
 	a.Logger = log.New(a.LogFile, "LOG: ", log.LstdFlags|log.Lshortfile)
+	var zl *zap.Logger
+	if a.Config.LogJSON {
+		zl, err = zap.NewProduction()
+	} else {
+		zl, err = zap.NewDevelopment()
+	}
+	if err == nil {
+		a.SLogger = zl.Sugar()
+	}
 }
 
 func (a *App) StopLogging() {
-	a.LogFile.Close()
+	_ = a.LogFile.Close()
+	if a.SLogger != nil {
+		_ = a.SLogger.Sync()
+	}
 }
 
 type Request struct {
@@ -60,21 +76,24 @@ func (a *App) parseRequest(r *http.Request) (Request, error) {
 		return Request{}, fmt.Errorf("invalid request: %s", r.URL.Path)
 	}
 
-	series := segments[0]
+	series := strings.ToLower(segments[0])
 	if len(series) == 0 {
 		return Request{}, fmt.Errorf("series is required")
 	}
-	if !dd.IsValidSeries(series, a.ValidSeries) {
+	if !dalle.IsValidSeries(series, a.ValidSeries) {
 		return Request{}, fmt.Errorf("invalid series")
 	}
 
-	address := segments[1]
+	address := strings.ToLower(segments[1])
 	if len(address) == 0 {
 		return Request{}, fmt.Errorf("address is required")
 	}
 	if !base.IsValidAddress(address) {
 		return Request{}, fmt.Errorf("invalid address")
 	}
+	// Normalize to checksum format for canonical storage / filenames (EIP-55 via go-ethereum)
+	addr := base.HexToAddress(address)
+	address = addr.Hex()
 
 	generate := r.URL.Query().Has("generate")
 	remove := r.URL.Query().Has("remove")
