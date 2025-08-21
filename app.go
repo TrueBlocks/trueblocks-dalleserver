@@ -38,9 +38,9 @@ func (c colorStripWriter) Write(p []byte) (int, error) {
 
 func NewApp() *App {
 	app := App{Config: LoadConfig()}
-	// Pre-create derived dirs lazily referenced
-	_ = os.MkdirAll(app.OutputDir(), 0o755)
-	_ = os.MkdirAll(app.SeriesDir(), 0o755)
+	// Pre-create derived dirs lazily referenced with least-privilege perms (group-only where needed)
+	_ = os.MkdirAll(app.OutputDir(), 0o750)
+	_ = os.MkdirAll(app.SeriesDir(), 0o750)
 	app.ValidSeries = dalle.ListSeries(app.SeriesDir())
 	return &app
 }
@@ -53,7 +53,7 @@ func (a *App) LogsDir() string   { return filepath.Join(a.Config.DataDir, "logs"
 
 // StartLogging initializes the rotating logger. Optionally pass a positive override size (MB) for tests.
 func (a *App) StartLogging(optionalMaxSize ...int) {
-	_ = os.MkdirAll(a.LogsDir(), 0o755)
+	_ = os.MkdirAll(a.LogsDir(), 0o750)
 	lfPath := filepath.Join(a.LogsDir(), "server.log")
 	maxSize := 50 // default MB
 	if envSz := os.Getenv("DALLESERVER_LOG_MAX_MB"); envSz != "" {

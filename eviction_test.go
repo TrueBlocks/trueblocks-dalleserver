@@ -18,11 +18,11 @@ func TestContextEvictionTTL(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = os.RemoveAll(tmp) })
 	_ = os.Setenv("DALLESERVER_DATA_DIR", tmp)
-	_ = os.MkdirAll(filepath.Join(tmp, "output"), 0o755)
+	_ = os.MkdirAll(filepath.Join(tmp, "output"), 0o750)
 	seriesDir := filepath.Join(tmp, "series")
-	_ = os.MkdirAll(seriesDir, 0o755)
-	_ = os.WriteFile(filepath.Join(seriesDir, "simple.json"), []byte(`{"suffix":"simple"}`), 0o644)
-	_ = os.WriteFile(filepath.Join(seriesDir, "simple2.json"), []byte(`{"suffix":"simple2"}`), 0o644)
+	_ = os.MkdirAll(seriesDir, 0o750)
+	_ = os.WriteFile(filepath.Join(seriesDir, "simple.json"), []byte(`{"suffix":"simple"}`), 0o600)
+	_ = os.WriteFile(filepath.Join(seriesDir, "simple2.json"), []byte(`{"suffix":"simple2"}`), 0o600)
 	seriesA := "simple"
 	addr := "0xf503017d7baf7fbc0fff7492b751025c6a78179b"
 	if _, err := dalle.GenerateAnnotatedImage(seriesA, addr, filepath.Join(tmp, "output"), true, time.Second); err != nil {

@@ -87,11 +87,13 @@ func computeDataDir(flagVal, envVal string) string {
 
 // ensureWritable makes sure directory exists and is writable.
 func ensureWritable(path string) error {
-	if err := os.MkdirAll(path, 0o755); err != nil {
+	// Create (or ensure) the directory with restricted permissions; callers can relax if explicitly required.
+	if err := os.MkdirAll(path, 0o750); err != nil {
 		return err
 	}
 	sentinel := filepath.Join(path, ".write_test")
-	if werr := os.WriteFile(sentinel, []byte("ok"), 0o644); werr != nil {
+	// Use 0o600 for the write test to satisfy gosec and to avoid exposing potential sensitive data.
+	if werr := os.WriteFile(sentinel, []byte("ok"), 0o600); werr != nil {
 		return werr
 	}
 	_ = os.Remove(sentinel)

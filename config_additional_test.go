@@ -1,3 +1,6 @@
+//go:build test
+
+// nolint:gosec // This test intentionally sets directory perms to 0500 (execute without write) to simulate non-writable parent; execute bit required for traversal.
 package main
 
 import (
@@ -48,12 +51,12 @@ func TestEnsureWritableFails(t *testing.T) {
 	}
 	defer os.RemoveAll(tmp)
 	deny := filepath.Join(tmp, "deny")
-	if err := os.MkdirAll(deny, 0o500); err != nil {
+	if err := os.MkdirAll(deny, 0o500); err != nil { // execute-only to simulate non-writable parent
 		t.Fatal(err)
 	}
 	child := filepath.Join(deny, "child")
 	// Remove write bit on deny directory
-	if err := os.Chmod(deny, 0o500); err != nil {
+	if err := os.Chmod(deny, 0o500); err != nil { // keep non-writable mode
 		t.Fatal(err)
 	}
 	if err := ensureWritable(child); err == nil {

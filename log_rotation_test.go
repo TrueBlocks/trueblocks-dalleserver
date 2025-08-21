@@ -15,10 +15,10 @@ func TestLogRotationSmallSize(t *testing.T) {
 	}
 	defer os.RemoveAll(tmp)
 	app := &App{Config: Config{DataDir: tmp}}
-	if err := os.MkdirAll(app.OutputDir(), 0o755); err != nil {
+	if err := os.MkdirAll(app.OutputDir(), 0o750); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.MkdirAll(app.SeriesDir(), 0o755); err != nil {
+	if err := os.MkdirAll(app.SeriesDir(), 0o750); err != nil {
 		t.Fatal(err)
 	}
 	app.StartLogging(1) // 1MB

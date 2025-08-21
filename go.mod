@@ -8,6 +8,7 @@ replace github.com/TrueBlocks/trueblocks-dalle/v2 => ./dalle
 require (
 	github.com/TrueBlocks/trueblocks-core/src/apps/chifra v0.0.0-20250819215522-14adadd17718
 	github.com/TrueBlocks/trueblocks-dalle/v2 v2.0.0-00010101000000-000000000000
+	golang.org/x/term v0.31.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
@@ -54,7 +55,6 @@ require (
 	golang.org/x/image v0.26.0 // indirect
 	golang.org/x/sync v0.13.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
-	golang.org/x/term v0.31.0 // indirect
 	golang.org/x/text v0.24.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	lukechampine.com/blake3 v1.4.1 // indirect

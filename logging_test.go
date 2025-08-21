@@ -17,8 +17,8 @@ func TestLoggingRotationBasic(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = os.RemoveAll(tmp) })
 	app := &App{Config: Config{DataDir: tmp}}
-	_ = os.MkdirAll(app.OutputDir(), 0o755)
-	_ = os.MkdirAll(app.SeriesDir(), 0o755)
+	_ = os.MkdirAll(app.OutputDir(), 0o750)
+	_ = os.MkdirAll(app.SeriesDir(), 0o750)
 	app.ValidSeries = dalle.ListSeries(app.SeriesDir())
 	app.StartLogging()
 	app.Logf("test line one")

@@ -20,10 +20,10 @@ func TestConcurrentGenerate(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = os.RemoveAll(tmp) })
 	_ = os.Setenv("DALLESERVER_DATA_DIR", tmp)
-	_ = os.MkdirAll(filepath.Join(tmp, "output"), 0o755)
+	_ = os.MkdirAll(filepath.Join(tmp, "output"), 0o750)
 	seriesDir := filepath.Join(tmp, "series")
-	_ = os.MkdirAll(seriesDir, 0o755)
-	_ = os.WriteFile(filepath.Join(seriesDir, "simple.json"), []byte(`{"suffix":"simple"}`), 0o644)
+	_ = os.MkdirAll(seriesDir, 0o750)
+	_ = os.WriteFile(filepath.Join(seriesDir, "simple.json"), []byte(`{"suffix":"simple"}`), 0o600)
 	series := "simple"
 	addr := "0xf503017d7baf7fbc0fff7492b751025c6a78179b"
 	const n = 10
