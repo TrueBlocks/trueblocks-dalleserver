@@ -222,7 +222,7 @@ PRs welcome. Please see the core project’s [branching workflow](https://github
 
 ## Contact
 
-Questions / ideas: join our Discord (linked from [https://trueblocks.io](https://trueblocks.io)).
+Questions / ideas / complaints: join our Discord (linked from [https://trueblocks.io](https://trueblocks.io)).
 
 ## Contributors
 
