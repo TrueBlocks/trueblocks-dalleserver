@@ -32,6 +32,5 @@ func TestMainRequestRespond(t *testing.T) {
 		app:      app,
 	}
 	req.filePath = filepath.Join(app.OutputDir(), req.series, req.address+".png")
-	defer os.Remove(filepath.Join("./pending", req.series+"-"+req.address+".lck"))
 	req.Respond(os.Stdout, nil)
 }

@@ -6,8 +6,8 @@
   "author": "Thomas Jay Rush <jrush@quickblocks.io>",
   "license": "GPL-3.0-or-later",
   "scripts": {
-    "start": "rm -f pending/* && go run .",
-    "serve": "rm -f pending/* && go run .",
+  "start": "go run .",
+  "serve": "go run .",
     "test": "go test ./..."
   }
 }

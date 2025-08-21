@@ -133,7 +133,6 @@ Derived sub-directories (created automatically):
 ```
 
 The server fails fast on startup if the data directory cannot be created or written.
-Transient lock files still reside under a `pending/` path within the chosen data directory.
 
 ## Direct library usage
 

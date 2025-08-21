@@ -1,5 +1,3 @@
-//go:build test
-
 // nolint:gosec // This test intentionally sets directory perms to 0500 (execute without write) to simulate non-writable parent; execute bit required for traversal.
 package main
 
