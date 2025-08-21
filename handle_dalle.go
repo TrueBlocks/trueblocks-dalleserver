@@ -57,16 +57,14 @@ func (req *Request) Respond(w io.Writer, r *http.Request) {
 		req.app.Logger.Println("calling the go routine to generate the image")
 		go func(series, addr, fp string) {
 			start := time.Now()
-			// OUTPUT_DIR
-			if _, err := generateAnnotatedImage(series, addr, "output", req.app.Config.SkipImage || os.Getenv("DALLESERVER_SKIP_IMAGE") == "1", req.app.Config.LockTTL); err != nil {
+			if _, err := generateAnnotatedImage(series, addr, req.app.OutputDir(), req.app.Config.SkipImage || os.Getenv("DALLESERVER_SKIP_IMAGE") == "1", req.app.Config.LockTTL); err != nil {
 				req.app.Logger.Println("error generating image:", err)
 			} else {
 				req.app.Logger.Printf("generated image for %s/%s in %s", series, addr, time.Since(start))
 			}
 		}(req.series, req.address, req.filePath)
 	} else {
-		// OUTPUT_DIR
-		if _, err := generateAnnotatedImage(req.series, req.address, "output", req.app.Config.SkipImage || os.Getenv("DALLESERVER_SKIP_IMAGE") == "1", req.app.Config.LockTTL); err != nil {
+		if _, err := generateAnnotatedImage(req.series, req.address, req.app.OutputDir(), req.app.Config.SkipImage || os.Getenv("DALLESERVER_SKIP_IMAGE") == "1", req.app.Config.LockTTL); err != nil {
 			req.app.Logger.Println("error generating image:", err)
 		}
 	}

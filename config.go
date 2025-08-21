@@ -3,7 +3,9 @@ package main
 import (
 	"bufio"
 	"flag"
+	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -14,7 +16,7 @@ type Config struct {
 	Port      string
 	SkipImage bool
 	LockTTL   time.Duration
-	LogJSON   bool
+	DataDir   string
 }
 
 // LoadConfig collects configuration from flags and environment.
@@ -27,10 +29,10 @@ func LoadConfig() Config {
 		var cfg Config
 		var portFlag string
 		var lockTTLStr string
-		var logJSON bool
+		var dataDirFlag string
 		flag.StringVar(&portFlag, "port", "8080", "Port to listen on")
 		flag.StringVar(&lockTTLStr, "lock-ttl", "5m", "TTL for request generation lock")
-		flag.BoolVar(&logJSON, "log-json", true, "Emit logs in JSON format")
+		flag.StringVar(&dataDirFlag, "data-dir", "", "Base data directory (overrides DALLESERVER_DATA_DIR)")
 		// Ignore errors (e.g., repeated parses in tests)
 		if !flag.Parsed() {
 			_ = flag.CommandLine.Parse(os.Args[1:])
@@ -49,10 +51,51 @@ func LoadConfig() Config {
 			cfg.SkipImage = true
 		}
 		cfg.LockTTL = ttl
-		cfg.LogJSON = logJSON
+		dataDir := computeDataDir(dataDirFlag, os.Getenv("DALLESERVER_DATA_DIR"))
+		if err := ensureWritable(dataDir); err != nil {
+			fmt.Fprintln(os.Stderr, "FATAL: cannot use data dir:", err)
+			os.Exit(1)
+		}
+		cfg.DataDir = dataDir
 		cachedConfig = cfg
 	})
 	return cachedConfig
+}
+
+// computeDataDir resolves a base data directory using precedence: explicit flag > env > default (under home).
+// Exposed for tests.
+func computeDataDir(flagVal, envVal string) string {
+	dataDir := flagVal
+	if dataDir == "" {
+		dataDir = envVal
+	}
+	if dataDir == "" {
+		home, herr := os.UserHomeDir()
+		if herr != nil || home == "" {
+			home = "."
+		}
+		dataDir = filepath.Join(home, ".local", "share", "trueblocks", "dalle")
+	}
+	dataDir = filepath.Clean(dataDir)
+	if !filepath.IsAbs(dataDir) {
+		if abs, aerr := filepath.Abs(dataDir); aerr == nil {
+			dataDir = abs
+		}
+	}
+	return dataDir
+}
+
+// ensureWritable makes sure directory exists and is writable.
+func ensureWritable(path string) error {
+	if err := os.MkdirAll(path, 0o755); err != nil {
+		return err
+	}
+	sentinel := filepath.Join(path, ".write_test")
+	if werr := os.WriteFile(sentinel, []byte("ok"), 0o644); werr != nil {
+		return werr
+	}
+	_ = os.Remove(sentinel)
+	return nil
 }
 
 // loadDotEnv loads key=value pairs from a local .env file (simple parser) if present.

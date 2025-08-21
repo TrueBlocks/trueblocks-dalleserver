@@ -33,8 +33,7 @@ func main() {
 	mux.HandleFunc("/healthz", handleHealth)
 	mux.HandleFunc("/metrics", handleMetrics)
 	mux.HandleFunc("/preview", app.handlePreview)
-	// OUTPUT_DIR
-	mux.Handle("/files/", http.StripPrefix("/files/", http.FileServer(http.Dir("output"))))
+	mux.Handle("/files/", http.StripPrefix("/files/", http.FileServer(http.Dir(app.OutputDir()))))
 
 	port := getPort()
 	srv := &http.Server{
@@ -48,20 +47,20 @@ func main() {
 
 	// Graceful shutdown
 	go func() {
-		fmt.Println("Starting server on", port)
+		app.Logf("Starting server on %s", port)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			fmt.Println("Server error:", err)
+			app.Logf("Server error: %v", err)
 		}
 	}()
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	fmt.Println("Shutdown signal received")
+	app.Logf("Shutdown signal received")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		fmt.Println("Graceful shutdown failed:", err)
+		app.Logf("Graceful shutdown failed: %v", err)
 		_ = srv.Close()
 	}
 }

@@ -8,7 +8,7 @@ replace github.com/TrueBlocks/trueblocks-dalle/v2 => ./dalle
 require (
 	github.com/TrueBlocks/trueblocks-core/src/apps/chifra v0.0.0-20250819215522-14adadd17718
 	github.com/TrueBlocks/trueblocks-dalle/v2 v2.0.0-00010101000000-000000000000
-	go.uber.org/zap v1.27.0
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
 require (
@@ -49,7 +49,6 @@ require (
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/cobra v1.9.1 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
-	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.37.0 // indirect
 	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0 // indirect
 	golang.org/x/image v0.26.0 // indirect

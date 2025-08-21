@@ -109,21 +109,31 @@ set -x DALLESERVER_SKIP_IMAGE 1; make run
 | `/healthz` | Basic health probe JSON. |
 | `/metrics` | Placeholder metrics endpoint. |
 
-## Output structure
+## Data directory layout
+
+All runtime artifacts live under a configurable base "data directory" resolved via:
+1. `--data-dir` flag
+2. `DALLESERVER_DATA_DIR` env var
+3. Default: `$HOME/.local/share/trueblocks/dalle`
+
+Derived sub-directories (created automatically):
 
 ```
-output/
-  series/                 # JSON series definitions (filters)
-  <series>/
-  data/                 # Raw data prompt
-  title/                # Title prompt
-  terse/                # Short prompt
-  prompt/               # Full prompt
-  enhanced/             # Enhanced (LLM) prompt text
-  annotated/            # Final PNG images (watermarked)
+<dataDir>/
+  output/
+    <series>/
+      data/        # Raw data prompt
+      title/       # Title prompt
+      terse/       # Short prompt
+      prompt/      # Full prompt
+      enhanced/    # Enhanced (LLM) prompt text
+      annotated/   # Final PNG images (watermarked)
+  series/          # JSON series definition files
+  logs/            # Rotating server logs (lumberjack)
 ```
 
-Transient lock files live under `pending/` while generation is occurring.
+The server fails fast on startup if the data directory cannot be created or written.
+Transient lock files still reside under a `pending/` path within the chosen data directory.
 
 ## Direct library usage
 
@@ -135,13 +145,21 @@ import (
   "time"
 )
 
-func generateOne(series, addr string) error {
-  // outputDir must exist / will be created relative to cwd
-  // OUTPUT_DIR
-  _, err := dalle.GenerateAnnotatedImage(series, addr, "output", false /* skipImage */, 30*time.Second)
+func generateOne(series, addr string, dataDir string) error {
+  outputDir := filepath.Join(dataDir, "output")
+  _ = os.MkdirAll(outputDir, 0o755)
+  _, err := dalle.GenerateAnnotatedImage(series, addr, outputDir, false /* skipImage */, 30*time.Second)
   return err
 }
 ```
+
+Or inside this server, prefer the helpers: `app.OutputDir()` and `app.SeriesDir()`.
+
+## Logging
+
+Logging uses a single rotating file (default max 50MB, 5 backups, 30d retention) located at `<dataDir>/logs/server.log` plus a mirror to stderr.
+Override max size for testing via env: `DALLESERVER_LOG_MAX_MB`.
+Removed prior zap dependency for simpler deployment; JSON logging mode no longer supported.
 
 Set `skipImage` true (or `DALLESERVER_SKIP_IMAGE=1`) for fast / offline usage.
 

@@ -3,12 +3,24 @@ package main
 import (
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"testing"
 
 	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
 )
 
 func TestParseRequest(t *testing.T) {
+	tmp, err := os.MkdirTemp("", "dalleserver-test-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(tmp) })
+	_ = os.Setenv("DALLESERVER_DATA_DIR", tmp)
+	// Ensure basic dirs
+	seriesDir := filepath.Join(tmp, "series")
+	_ = os.MkdirAll(seriesDir, 0o755)
+	_ = os.WriteFile(filepath.Join(seriesDir, "simple.json"), []byte(`{"suffix":"simple"}`), 0o644)
 	app := NewApp()
 	cases := []struct {
 		path      string
@@ -33,8 +45,16 @@ func TestParseRequest(t *testing.T) {
 }
 
 func TestListSeries(t *testing.T) {
-	// OUTPUT_DIR
-	list := dalle.ListSeries("output")
+	tmp, err := os.MkdirTemp("", "dalleserver-test-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(tmp) })
+	_ = os.Setenv("DALLESERVER_DATA_DIR", tmp)
+	seriesDir := filepath.Join(tmp, "series")
+	_ = os.MkdirAll(seriesDir, 0o755)
+	_ = os.WriteFile(filepath.Join(seriesDir, "simple.json"), []byte(`{"suffix":"simple"}`), 0o644)
+	list := dalle.ListSeries(seriesDir)
 	if len(list) == 0 {
 		t.Fatalf("expected at least one series")
 	}

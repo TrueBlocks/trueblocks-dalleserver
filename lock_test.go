@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
 	"sync"
 	"testing"
 	"time"
@@ -12,6 +14,16 @@ import (
 func TestConcurrentGenerate(t *testing.T) {
 	// Configure small manager to ensure eviction not triggered here
 	dalle.ConfigureManager(dalle.ManagerOptions{MaxContexts: 5, ContextTTL: time.Minute})
+	tmp, err := os.MkdirTemp("", "dalleserver-test-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(tmp) })
+	_ = os.Setenv("DALLESERVER_DATA_DIR", tmp)
+	_ = os.MkdirAll(filepath.Join(tmp, "output"), 0o755)
+	seriesDir := filepath.Join(tmp, "series")
+	_ = os.MkdirAll(seriesDir, 0o755)
+	_ = os.WriteFile(filepath.Join(seriesDir, "simple.json"), []byte(`{"suffix":"simple"}`), 0o644)
 	series := "simple"
 	addr := "0xf503017d7baf7fbc0fff7492b751025c6a78179b"
 	const n = 10
@@ -22,8 +34,7 @@ func TestConcurrentGenerate(t *testing.T) {
 	for i := 0; i < n; i++ {
 		go func() {
 			defer wg.Done()
-			// OUTPUT_DIR
-			p, err := dalle.GenerateAnnotatedImage(series, addr, "output", true, 2*time.Second)
+			p, err := dalle.GenerateAnnotatedImage(series, addr, filepath.Join(tmp, "output"), true, 2*time.Second)
 			if err != nil {
 				errs <- err
 				return

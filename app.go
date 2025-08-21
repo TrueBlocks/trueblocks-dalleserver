@@ -3,55 +3,103 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/base"
+	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/logger"
 	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
-	"go.uber.org/zap"
+	"golang.org/x/term"
+	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 )
 
 type App struct {
 	ValidSeries []string
 	Logger      *log.Logger
-	LogFile     *os.File
-	SLogger     *zap.SugaredLogger
+	logCloser   io.Closer
 	Config      Config
+}
+
+// colorStripWriter removes ANSI escape sequences before writing (used for file logs).
+type colorStripWriter struct{ w io.Writer }
+
+var ansiRegexp = regexp.MustCompile(`\x1b\[[0-9;]*m`)
+
+func (c colorStripWriter) Write(p []byte) (int, error) {
+	clean := ansiRegexp.ReplaceAll(p, nil)
+	return c.w.Write(clean)
 }
 
 func NewApp() *App {
 	app := App{Config: LoadConfig()}
-	// OUTPUT_DIR
-	app.ValidSeries = dalle.ListSeries("output")
+	// Pre-create derived dirs lazily referenced
+	_ = os.MkdirAll(app.OutputDir(), 0o755)
+	_ = os.MkdirAll(app.SeriesDir(), 0o755)
+	app.ValidSeries = dalle.ListSeries(app.SeriesDir())
 	return &app
 }
 
-func (a *App) StartLogging() {
-	var err error
-	// Use restrictive permissions (0600) per gosec recommendation (was 0666)
-	a.LogFile, err = os.OpenFile("server.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
-	if err != nil {
-		log.Fatalf("Failed to open log file: %v", err)
+// Helper directory accessors (derived from DataDir)
+func (a *App) DataDir() string   { return a.Config.DataDir }
+func (a *App) OutputDir() string { return filepath.Join(a.Config.DataDir, "output") }
+func (a *App) SeriesDir() string { return filepath.Join(a.Config.DataDir, "series") }
+func (a *App) LogsDir() string   { return filepath.Join(a.Config.DataDir, "logs") }
+
+// StartLogging initializes the rotating logger. Optionally pass a positive override size (MB) for tests.
+func (a *App) StartLogging(optionalMaxSize ...int) {
+	_ = os.MkdirAll(a.LogsDir(), 0o755)
+	lfPath := filepath.Join(a.LogsDir(), "server.log")
+	maxSize := 50 // default MB
+	if envSz := os.Getenv("DALLESERVER_LOG_MAX_MB"); envSz != "" {
+		if v, err := strconv.Atoi(envSz); err == nil && v > 0 {
+			maxSize = v
+		}
 	}
-	a.Logger = log.New(a.LogFile, "LOG: ", log.LstdFlags|log.Lshortfile)
-	var zl *zap.Logger
-	if a.Config.LogJSON {
-		zl, err = zap.NewProduction()
-	} else {
-		zl, err = zap.NewDevelopment()
+	if len(optionalMaxSize) > 0 && optionalMaxSize[0] > 0 {
+		maxSize = optionalMaxSize[0]
 	}
-	if err == nil {
-		a.SLogger = zl.Sugar()
+	rotator := &lumberjack.Logger{
+		Filename:   lfPath,
+		MaxSize:    maxSize, // megabytes
+		MaxBackups: 5,
+		MaxAge:     30, // days
+		Compress:   false,
 	}
+	a.logCloser = rotator
+
+	// Writer for file (strip ANSI). Always strip for file.
+	fileWriter := colorStripWriter{w: rotator}
+
+	// Stderr writer: keep colors if terminal, else strip.
+	stderrWriter := io.Writer(os.Stderr)
+	if !term.IsTerminal(int(os.Stderr.Fd())) { // redirected
+		stderrWriter = colorStripWriter{w: os.Stderr}
+	}
+
+	// Multiwriter for server logger (file + stderr)
+	serverMW := io.MultiWriter(fileWriter, stderrWriter)
+	a.Logger = log.New(serverMW, "", log.LstdFlags|log.Lmicroseconds)
+	a.Logger.Printf("logging started (rotating): %s", lfPath)
+
+	// Redirect core logger to same sinks (with file color stripping already handled)
+	logger.SetLoggerWriter(serverMW)
 }
 
 func (a *App) StopLogging() {
-	_ = a.LogFile.Close()
-	if a.SLogger != nil {
-		_ = a.SLogger.Sync()
+	if a.logCloser != nil {
+		_ = a.logCloser.Close()
+	}
+}
+
+func (a *App) Logf(format string, args ...any) { // convenience
+	if a.Logger != nil {
+		a.Logger.Printf(format, args...)
 	}
 }
 
@@ -99,8 +147,7 @@ func (a *App) parseRequest(r *http.Request) (Request, error) {
 	generate := r.URL.Query().Has("generate")
 	remove := r.URL.Query().Has("remove")
 
-	// OUTPUT_DIR
-	filePath := filepath.Join("./output", series, "annotated", address+".png")
+	filePath := filepath.Join(a.OutputDir(), series, "annotated", address+".png")
 	return Request{
 		filePath: filePath,
 		series:   series,

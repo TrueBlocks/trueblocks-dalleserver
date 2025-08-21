@@ -4,12 +4,23 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
 
 // Test error paths on the /dalle/ handler surface proper 400s with expected messages.
 func TestHandleDalleErrors(t *testing.T) {
+	tmp, err := os.MkdirTemp("", "dalleserver-test-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(tmp) })
+	_ = os.Setenv("DALLESERVER_DATA_DIR", tmp)
+	seriesDir := filepath.Join(tmp, "series")
+	_ = os.MkdirAll(seriesDir, 0o755)
+	_ = os.WriteFile(filepath.Join(seriesDir, "simple.json"), []byte(`{"suffix":"simple"}`), 0o644)
 	app := NewApp()
 	app.StartLogging()
 	defer app.StopLogging()

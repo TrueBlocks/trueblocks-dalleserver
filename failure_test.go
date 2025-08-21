@@ -5,6 +5,8 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -13,6 +15,15 @@ import (
 // TestSimulatedOpenAIFailure injects a failing generateAnnotatedImage to ensure the handler
 // logs the error path without panicking and still responds 200 with standard message.
 func TestSimulatedOpenAIFailure(t *testing.T) {
+	tmp, err := os.MkdirTemp("", "dalleserver-test-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(tmp) })
+	_ = os.Setenv("DALLESERVER_DATA_DIR", tmp)
+	seriesDir := filepath.Join(tmp, "series")
+	_ = os.MkdirAll(seriesDir, 0o755)
+	_ = os.WriteFile(filepath.Join(seriesDir, "simple.json"), []byte(`{"suffix":"simple"}`), 0o644)
 	app := NewApp()
 	app.StartLogging()
 	defer app.StopLogging()
