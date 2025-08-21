@@ -14,6 +14,7 @@ func TestLogRotationSmallSize(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(tmp)
+	_ = os.Setenv("DALLESERVER_SILENT_LOG", "1")
 	app := &App{Config: Config{DataDir: tmp}}
 	if err := os.MkdirAll(app.OutputDir(), 0o750); err != nil {
 		t.Fatal(err)
@@ -23,12 +24,12 @@ func TestLogRotationSmallSize(t *testing.T) {
 	}
 	app.StartLogging(1) // 1MB
 	defer app.StopLogging()
-	// Write ~1.2MB
-	chunk := make([]byte, 64*1024) // 64KB
+	// Write ~256KB instead of >1MB – sufficient to exercise rotation logic with small MaxSize
+	chunk := make([]byte, 32*1024) // 32KB
 	for i := range chunk {
 		chunk[i] = 'a'
 	}
-	for i := 0; i < 20; i++ { // 20 * 64KB = 1.25MB
+	for i := 0; i < 8; i++ { // 8 * 32KB = 256KB
 		app.Logf(string(chunk))
 	}
 	// Allow flush

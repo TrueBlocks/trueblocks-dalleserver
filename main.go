@@ -10,8 +10,6 @@ import (
 	"strings"
 	"syscall"
 	"time"
-
-	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/logger"
 )
 
 func main() {
@@ -21,8 +19,7 @@ func main() {
 
 	// Fail fast if required OpenAI key missing (before starting server)
 	if os.Getenv("OPENAI_API_KEY") == "" {
-		fmt.Fprintln(os.Stderr, "FATAL: OPENAI_API_KEY not set in environment (.env not loaded or missing). Exiting.")
-		os.Exit(1)
+		fmt.Fprintln(os.Stderr, "WARNING: OPENAI_API_KEY not set; image generation will be skipped.")
 	}
 
 	mux := http.NewServeMux()
@@ -86,9 +83,10 @@ func getPort() string {
 		}
 		n := strings.ReplaceAll(os.Args[1], "--port=", "")
 		if !isNumeric(n) {
-			logger.Fatal("Invalid port number: " + n)
+			fmt.Fprintln(os.Stderr, "WARNING: invalid port number, falling back to :8080 =>", n)
+		} else {
+			port = ":" + n
 		}
-		port = ":" + n
 	}
 	return port
 }

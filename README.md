@@ -102,12 +102,28 @@ set -x DALLESERVER_SKIP_IMAGE 1; make run
 
 | Path | Description |
 |------|-------------|
-| `/dalle/<series>/<address>` | Returns image if already generated; else a message. Add `?generate=1` to force generation. |
+| `/dalle/<series>/<address>` | Returns annotated image if complete; otherwise a JSON progress snapshot (add `?generate=1` to start/force generation). |
 | `/series` | Lists available series names. |
 | `/preview` | HTML gallery of annotated images (filterable). |
 | `/files/...` | Static access to generated output tree. |
 | `/healthz` | Basic health probe JSON. |
 | `/metrics` | Placeholder metrics endpoint. |
+
+While a generation is in progress the `/dalle/...` response looks like (truncated):
+
+```json
+{
+  "series": "simple",
+  "address": "0x...",
+  "currentPhase": "image_wait",
+  "percent": 42.7,
+  "etaSeconds": 11.3,
+  "done": false,
+  "cacheHit": false
+}
+```
+
+Poll the same URL until `"done": true`; then re-request (optionally without `?generate=1`) to fetch the final PNG.
 
 ## Data directory layout
 

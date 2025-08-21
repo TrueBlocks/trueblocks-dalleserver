@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -44,8 +45,7 @@ func (req *Request) Respond(w io.Writer, r *http.Request) {
 	req.app.Logger.Println("exists:", exists)
 	req.app.Logger.Println("generate:", req.generate)
 	if exists && !req.generate {
-		rw, ok := w.(http.ResponseWriter)
-		if ok {
+		if rw, ok := w.(http.ResponseWriter); ok {
 			req.app.Logger.Println("the image exists, serving it")
 			http.ServeFile(rw, r, req.filePath)
 			return
@@ -53,22 +53,34 @@ func (req *Request) Respond(w io.Writer, r *http.Request) {
 	}
 
 	if !isDebugging {
-		// Fire off async generation respecting in-memory lock
-		req.app.Logger.Println("calling the go routine to generate the image")
-		go func(series, addr, fp string) {
+		// start generation asynchronously if not already in progress
+		req.app.Logger.Println("starting generation goroutine (if lock acquired)")
+		go func(series, addr string) {
 			start := time.Now()
 			if _, err := generateAnnotatedImage(series, addr, req.app.OutputDir(), req.app.Config.SkipImage || os.Getenv("DALLESERVER_SKIP_IMAGE") == "1", req.app.Config.LockTTL); err != nil {
 				req.app.Logger.Println("error generating image:", err)
 			} else {
 				req.app.Logger.Printf("generated image for %s/%s in %s", series, addr, time.Since(start))
 			}
-		}(req.series, req.address, req.filePath)
+		}(req.series, req.address)
 	} else {
 		if _, err := generateAnnotatedImage(req.series, req.address, req.app.OutputDir(), req.app.Config.SkipImage || os.Getenv("DALLESERVER_SKIP_IMAGE") == "1", req.app.Config.LockTTL); err != nil {
 			req.app.Logger.Println("error generating image:", err)
 		}
 	}
 
-	fmt.Fprintln(w, "Your image will be ready shortly")
+	// Always attempt to fetch progress (may be nil if run not started yet)
+	pr := dalle.GetProgress(req.series, req.address)
+	if pr == nil {
+		fmt.Fprintln(w, "{}")
+		return
+	}
+	// Force headers if possible
+	if rw, ok := w.(http.ResponseWriter); ok {
+		rw.Header().Set("Content-Type", "application/json")
+	}
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	_ = enc.Encode(pr)
 
 }

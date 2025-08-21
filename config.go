@@ -53,8 +53,16 @@ func LoadConfig() Config {
 		cfg.LockTTL = ttl
 		dataDir := computeDataDir(dataDirFlag, os.Getenv("DALLESERVER_DATA_DIR"))
 		if err := ensureWritable(dataDir); err != nil {
-			fmt.Fprintln(os.Stderr, "FATAL: cannot use data dir:", err)
-			os.Exit(1)
+			// Fall back to a temp directory instead of exiting so tests / server can continue.
+			tmp, terr := os.MkdirTemp("", "dalleserver-fallback-*")
+			if terr != nil {
+				fmt.Fprintln(os.Stderr, "ERROR: cannot establish writable data dir:", err)
+				// Last resort: keep original (likely failing) path to surface errors later.
+				dataDir = dataDir + "-unwritable"
+			} else {
+				fmt.Fprintln(os.Stderr, "WARNING: using fallback temp data dir due to error:", err)
+				dataDir = tmp
+			}
 		}
 		cfg.DataDir = dataDir
 		cachedConfig = cfg

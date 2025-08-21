@@ -41,15 +41,19 @@ func NewApp() *App {
 	// Pre-create derived dirs lazily referenced with least-privilege perms (group-only where needed)
 	_ = os.MkdirAll(app.OutputDir(), 0o750)
 	_ = os.MkdirAll(app.SeriesDir(), 0o750)
+	// Ensure metrics directory lives under DataDir and inform dalle package (treat like other dirs)
+	_ = os.MkdirAll(app.MetricsDir(), 0o750)
+	dalle.SetMetricsDir(app.MetricsDir())
 	app.ValidSeries = dalle.ListSeries(app.SeriesDir())
 	return &app
 }
 
 // Helper directory accessors (derived from DataDir)
-func (a *App) DataDir() string   { return a.Config.DataDir }
-func (a *App) OutputDir() string { return filepath.Join(a.Config.DataDir, "output") }
-func (a *App) SeriesDir() string { return filepath.Join(a.Config.DataDir, "series") }
-func (a *App) LogsDir() string   { return filepath.Join(a.Config.DataDir, "logs") }
+func (a *App) DataDir() string    { return a.Config.DataDir }
+func (a *App) OutputDir() string  { return filepath.Join(a.Config.DataDir, "output") }
+func (a *App) SeriesDir() string  { return filepath.Join(a.Config.DataDir, "series") }
+func (a *App) LogsDir() string    { return filepath.Join(a.Config.DataDir, "logs") }
+func (a *App) MetricsDir() string { return filepath.Join(a.Config.DataDir, "metrics") }
 
 // StartLogging initializes the rotating logger. Optionally pass a positive override size (MB) for tests.
 func (a *App) StartLogging(optionalMaxSize ...int) {
@@ -76,14 +80,20 @@ func (a *App) StartLogging(optionalMaxSize ...int) {
 	// Writer for file (strip ANSI). Always strip for file.
 	fileWriter := colorStripWriter{w: rotator}
 
-	// Stderr writer: keep colors if terminal, else strip.
-	stderrWriter := io.Writer(os.Stderr)
-	if !term.IsTerminal(int(os.Stderr.Fd())) { // redirected
-		stderrWriter = colorStripWriter{w: os.Stderr}
+	// Optional silent mode for tests to avoid flooding `go test` output (which caused
+	// unexplained non-zero exit when very large log output was emitted). When
+	// DALLESERVER_SILENT_LOG=1 we do not mirror logs to stderr.
+	silent := os.Getenv("DALLESERVER_SILENT_LOG") == "1"
+	var serverMW io.Writer
+	if silent {
+		serverMW = fileWriter
+	} else {
+		stderrWriter := io.Writer(os.Stderr)
+		if !term.IsTerminal(int(os.Stderr.Fd())) { // redirected
+			stderrWriter = colorStripWriter{w: os.Stderr}
+		}
+		serverMW = io.MultiWriter(fileWriter, stderrWriter)
 	}
-
-	// Multiwriter for server logger (file + stderr)
-	serverMW := io.MultiWriter(fileWriter, stderrWriter)
 	a.Logger = log.New(serverMW, "", log.LstdFlags|log.Lmicroseconds)
 	a.Logger.Printf("logging started (rotating): %s", lfPath)
 

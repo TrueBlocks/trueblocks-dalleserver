@@ -42,7 +42,8 @@ func TestSimulatedOpenAIFailure(t *testing.T) {
 	isDebugging = true
 	defer func() { isDebugging = prevDebug }()
 
-	addr := "0xf503017d7baf7fbc0fff7492b751025c6a78179b"
+	// Use a unique address unlikely to have prior progress to better isolate this test
+	addr := "0x5555555555555555555555555555555555555555"
 	url := "/dalle/simple/" + addr + "?generate=1"
 	r := httptest.NewRequest(http.MethodGet, url, nil)
 	w := httptest.NewRecorder()
@@ -53,8 +54,12 @@ func TestSimulatedOpenAIFailure(t *testing.T) {
 	}
 	bodyBytes, _ := io.ReadAll(res.Body)
 	body := string(bodyBytes)
-	if !strings.Contains(body, "Your image will be ready shortly") {
-		t.Fatalf("expected standard success message, got %q", body)
+	trimmed := strings.TrimSpace(body)
+	// Handler now always returns JSON progress (or {} if no progress yet) instead of a static message.
+	if !strings.HasPrefix(trimmed, "{") || !strings.HasSuffix(trimmed, "}\n") && !strings.HasSuffix(trimmed, "}") {
+		// Basic sanity check that we received JSON; we don't assert specific fields because
+		// the injected failure prevents progress initialization.
+		t.Fatalf("expected JSON progress body, got %q", body)
 	}
 	if called != 1 {
 		t.Fatalf("expected injected generator to be called once, got %d", called)
