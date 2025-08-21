@@ -29,9 +29,6 @@ bench-baseline:
 	  cp benchmarks/$$ts.json benchmarks/latest.json; \
 	  echo "Saved benchmark baseline to benchmarks/$$ts.json and updated benchmarks/latest.json"
 
-clean-output:
-	rm -rf output/*/*/*.png output/*/annotated/*.png || true
-
 # Build & serve documentation book (mdBook) from ./book
 .PHONY: book
 book:

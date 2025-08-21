@@ -71,6 +71,7 @@ function filterSeries(){const q=document.getElementById('filter').value.toLowerC
 </body></html>`))
 
 func (a *App) handlePreview(w http.ResponseWriter, r *http.Request) {
+	// OUTPUT_DIR
 	root := "output"
 	var images []imageMeta
 	_ = filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {

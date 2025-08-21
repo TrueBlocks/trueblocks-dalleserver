@@ -33,7 +33,7 @@ func main() {
 	mux.HandleFunc("/healthz", handleHealth)
 	mux.HandleFunc("/metrics", handleMetrics)
 	mux.HandleFunc("/preview", app.handlePreview)
-	// Static file server for browsing raw output (limited to annotated/ images via handler logic)
+	// OUTPUT_DIR
 	mux.Handle("/files/", http.StripPrefix("/files/", http.FileServer(http.Dir("output"))))
 
 	port := getPort()

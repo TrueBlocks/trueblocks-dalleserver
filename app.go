@@ -24,6 +24,7 @@ type App struct {
 
 func NewApp() *App {
 	app := App{Config: LoadConfig()}
+	// OUTPUT_DIR
 	app.ValidSeries = dalle.ListSeries("output")
 	return &app
 }
@@ -98,6 +99,7 @@ func (a *App) parseRequest(r *http.Request) (Request, error) {
 	generate := r.URL.Query().Has("generate")
 	remove := r.URL.Query().Has("remove")
 
+	// OUTPUT_DIR
 	filePath := filepath.Join("./output", series, "annotated", address+".png")
 	return Request{
 		filePath: filePath,

@@ -13,6 +13,7 @@ func BenchmarkGenerateAnnotatedImage(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		series := "bench" // reuse same to exercise cache
+		// OUTPUT_DIR
 		if _, err := dalle.GenerateAnnotatedImage(series, addr, "output", true, time.Second); err != nil {
 			b.Fatal(err)
 		}

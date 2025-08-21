@@ -137,6 +137,7 @@ import (
 
 func generateOne(series, addr string) error {
   // outputDir must exist / will be created relative to cwd
+  // OUTPUT_DIR
   _, err := dalle.GenerateAnnotatedImage(series, addr, "output", false /* skipImage */, 30*time.Second)
   return err
 }

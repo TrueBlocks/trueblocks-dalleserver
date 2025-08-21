@@ -33,6 +33,7 @@ func TestParseRequest(t *testing.T) {
 }
 
 func TestListSeries(t *testing.T) {
+	// OUTPUT_DIR
 	list := dalle.ListSeries("output")
 	if len(list) == 0 {
 		t.Fatalf("expected at least one series")
