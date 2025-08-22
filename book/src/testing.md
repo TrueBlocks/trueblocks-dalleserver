@@ -13,7 +13,7 @@ Run tests (skip real image generation):
 ```bash
 make test
 ```
-Internally sets `DALLESERVER_SKIP_IMAGE=1`.
+Internally sets `TB_DALLE_SKIP_IMAGE=1`.
 
 ## Race Detector
 ```bash

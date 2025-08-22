@@ -8,8 +8,8 @@ import (
 )
 
 func TestMainRequestRespond(t *testing.T) {
-	_ = os.Setenv("DALLESERVER_SKIP_IMAGE", "1")
-	defer os.Unsetenv("DALLESERVER_SKIP_IMAGE")
+	_ = os.Setenv("TB_DALLE_SKIP_IMAGE", "1")
+	defer os.Unsetenv("TB_DALLE_SKIP_IMAGE")
 	cwd, _ := os.Getwd()
 	fmt.Println(cwd)
 	isDebugging = true

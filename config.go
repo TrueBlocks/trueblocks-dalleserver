@@ -44,10 +44,10 @@ func LoadConfig() Config {
 			ttl = 5 * time.Minute
 		}
 		cfg.Port = ":" + portFlag
-		if envPort := os.Getenv("DALLESERVER_PORT"); envPort != "" {
+		if envPort := os.Getenv("TB_DALLE_PORT"); envPort != "" {
 			cfg.Port = ":" + envPort
 		}
-		cfg.SkipImage = os.Getenv("DALLESERVER_SKIP_IMAGE") == "1"
+		cfg.SkipImage = os.Getenv("TB_DALLE_SKIP_IMAGE") == "1"
 		// Auto-enable skip (mock) if no API key present
 		if os.Getenv("OPENAI_API_KEY") == "" {
 			cfg.SkipImage = true

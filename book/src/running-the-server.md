@@ -19,7 +19,7 @@ Graceful shutdown: Ctrl+C sends SIGINT which triggers a 10s timeout shutdown seq
 ## Ports
 
 - Default: `:8080`
-- Override via `--port=<n>` command-line flag or `DALLESERVER_PORT` env var.
+- Override via `--port=<n>` command-line flag or `TB_DALLE_PORT` env var.
 
 ## Data Directory
 

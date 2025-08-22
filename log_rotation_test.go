@@ -14,7 +14,7 @@ func TestLogRotationSmallSize(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(tmp)
-	_ = os.Setenv("DALLESERVER_SILENT_LOG", "1")
+	_ = os.Setenv("TB_DALLE_SILENT_LOG", "1")
 	app := &App{Config: Config{DataDir: tmp}}
 	if err := os.MkdirAll(app.OutputDir(), 0o750); err != nil {
 		t.Fatal(err)

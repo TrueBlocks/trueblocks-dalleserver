@@ -71,10 +71,10 @@ http://localhost:8080/preview
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `OPENAI_API_KEY` | Key for enhancement + DALL·E image calls (required unless skipping) | (none) |
-| `DALLESERVER_SKIP_IMAGE` | `1` to skip actual image generation (offline / fast tests) | unset |
-| `DALLESERVER_NO_ENHANCE` | `1` to disable LLM enhancement (use raw prompt) | unset |
-| `DALLESERVER_ENHANCE_TIMEOUT` | Override enhance prompt timeout (e.g. `75s`) | `60s` |
-| `DALLESERVER_IMAGE_TIMEOUT` | Timeout for image request + download | `30s` |
+| `TB_DALLE_SKIP_IMAGE` | `1` to skip actual image generation (offline / fast tests) | unset |
+| `TB_DALLE_NO_ENHANCE` | `1` to disable LLM enhancement (use raw prompt) | unset |
+| `TB_DALLE_ENHANCE_TIMEOUT` | Override enhance prompt timeout (e.g. `75s`) | `60s` |
+| `TB_DALLE_IMAGE_TIMEOUT` | Timeout for image request + download | `30s` |
 | `DALLE_QUALITY` | DALL·E quality parameter (`standard`, `hd`, etc.) | `standard` |
 
 Example (fish shell):
@@ -95,7 +95,7 @@ make run
 Offline/dev mode:
 
 ```fish
-set -x DALLESERVER_SKIP_IMAGE 1; make run
+set -x TB_DALLE_SKIP_IMAGE 1; make run
 ```
 
 ## Endpoints
@@ -174,10 +174,10 @@ Or inside this server, prefer the helpers: `app.OutputDir()` and `app.SeriesDir(
 ## Logging
 
 Logging uses a single rotating file (default max 50MB, 5 backups, 30d retention) located at `<dataDir>/logs/server.log` plus a mirror to stderr.
-Override max size for testing via env: `DALLESERVER_LOG_MAX_MB`.
+Override max size for testing via env: `TB_DALLE_LOG_MAX_MB`.
 Removed prior zap dependency for simpler deployment; JSON logging mode no longer supported.
 
-Set `skipImage` true (or `DALLESERVER_SKIP_IMAGE=1`) for fast / offline usage.
+Set `skipImage` true (or `TB_DALLE_SKIP_IMAGE=1`) for fast / offline usage.
 
 ## .env example
 
@@ -199,7 +199,7 @@ Key server concerns illustrated here:
 
 ```bash
 make lint      # runs golangci-lint
-make test      # skips network/image by setting DALLESERVER_SKIP_IMAGE=1 internally
+make test      # skips network/image by setting TB_DALLE_SKIP_IMAGE=1 internally
 ```
 
 Run a single benchmark:
@@ -218,8 +218,8 @@ make bench-baseline
 
 | Symptom | Likely Cause | Fix |
 |---------|--------------|-----|
-| Immediate exit: `OPENAI_API_KEY not set` | Missing key & not in skip mode | Export key or set `DALLESERVER_SKIP_IMAGE=1` |
-| Enhancement timeout | Model slow / low timeout | Increase `DALLESERVER_ENHANCE_TIMEOUT` |
+| Immediate exit: `OPENAI_API_KEY not set` | Missing key & not in skip mode | Export key or set `TB_DALLE_SKIP_IMAGE=1` |
+| Enhancement timeout | Model slow / low timeout | Increase `TB_DALLE_ENHANCE_TIMEOUT` |
 | Blank preview page | No images yet | Trigger generation (`?generate=1`) |
 | 404 under `/files/` | File not generated yet | Wait for generation to complete |
 
