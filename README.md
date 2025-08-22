@@ -129,8 +129,9 @@ Poll the same URL until `"done": true`; then re-request (optionally without `?ge
 
 All runtime artifacts live under a configurable base "data directory" resolved via:
 1. `--data-dir` flag
-2. `DALLESERVER_DATA_DIR` env var
-3. Default: `$HOME/.local/share/trueblocks/dalle`
+2. `TB_DALLE_DATA_DIR` env var
+3. `$XDG_DATA_HOME/trueblocks/dalle` if `XDG_DATA_HOME` is set
+4. Default: `$HOME/.local/share/trueblocks/dalle`
 
 Derived sub-directories (created automatically):
 

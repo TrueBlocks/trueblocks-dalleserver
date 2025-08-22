@@ -13,12 +13,7 @@ func TestMainRequestRespond(t *testing.T) {
 	cwd, _ := os.Getwd()
 	fmt.Println(cwd)
 	isDebugging = true
-	tmp, err := os.MkdirTemp("", "dalleserver-test-*")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = os.RemoveAll(tmp) })
-	_ = os.Setenv("DALLESERVER_DATA_DIR", tmp)
+	_ = withTempDataDir(t, map[string]string{"simple": `{"suffix":"simple"}`})
 	app := NewApp()
 	app.StartLogging()
 	defer app.StopLogging()

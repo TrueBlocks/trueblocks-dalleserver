@@ -9,6 +9,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
 )
 
 // Config holds runtime configuration.
@@ -32,7 +34,7 @@ func LoadConfig() Config {
 		var dataDirFlag string
 		flag.StringVar(&portFlag, "port", "8080", "Port to listen on")
 		flag.StringVar(&lockTTLStr, "lock-ttl", "5m", "TTL for request generation lock")
-		flag.StringVar(&dataDirFlag, "data-dir", "", "Base data directory (overrides DALLESERVER_DATA_DIR)")
+		flag.StringVar(&dataDirFlag, "data-dir", "", "Base data directory (overrides TB_DALLE_DATA_DIR)")
 		// Ignore errors (e.g., repeated parses in tests)
 		if !flag.Parsed() {
 			_ = flag.CommandLine.Parse(os.Args[1:])
@@ -51,7 +53,7 @@ func LoadConfig() Config {
 			cfg.SkipImage = true
 		}
 		cfg.LockTTL = ttl
-		dataDir := computeDataDir(dataDirFlag, os.Getenv("DALLESERVER_DATA_DIR"))
+		dataDir := dalle.ComputeDataDir(dataDirFlag, os.Getenv("TB_DALLE_DATA_DIR"))
 		if err := ensureWritable(dataDir); err != nil {
 			// Fall back to a temp directory instead of exiting so tests / server can continue.
 			tmp, terr := os.MkdirTemp("", "dalleserver-fallback-*")
@@ -68,29 +70,6 @@ func LoadConfig() Config {
 		cachedConfig = cfg
 	})
 	return cachedConfig
-}
-
-// computeDataDir resolves a base data directory using precedence: explicit flag > env > default (under home).
-// Exposed for tests.
-func computeDataDir(flagVal, envVal string) string {
-	dataDir := flagVal
-	if dataDir == "" {
-		dataDir = envVal
-	}
-	if dataDir == "" {
-		home, herr := os.UserHomeDir()
-		if herr != nil || home == "" {
-			home = "."
-		}
-		dataDir = filepath.Join(home, ".local", "share", "trueblocks", "dalle")
-	}
-	dataDir = filepath.Clean(dataDir)
-	if !filepath.IsAbs(dataDir) {
-		if abs, aerr := filepath.Abs(dataDir); aerr == nil {
-			dataDir = abs
-		}
-	}
-	return dataDir
 }
 
 // ensureWritable makes sure directory exists and is writable.
