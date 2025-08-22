@@ -60,7 +60,7 @@ func (a *App) StartLogging(optionalMaxSize ...int) {
 	_ = os.MkdirAll(a.LogsDir(), 0o750)
 	lfPath := filepath.Join(a.LogsDir(), "server.log")
 	maxSize := 50 // default MB
-	if envSz := os.Getenv("DALLESERVER_LOG_MAX_MB"); envSz != "" {
+	if envSz := os.Getenv("TB_DALLE_LOG_MAX_MB"); envSz != "" {
 		if v, err := strconv.Atoi(envSz); err == nil && v > 0 {
 			maxSize = v
 		}
@@ -82,8 +82,8 @@ func (a *App) StartLogging(optionalMaxSize ...int) {
 
 	// Optional silent mode for tests to avoid flooding `go test` output (which caused
 	// unexplained non-zero exit when very large log output was emitted). When
-	// DALLESERVER_SILENT_LOG=1 we do not mirror logs to stderr.
-	silent := os.Getenv("DALLESERVER_SILENT_LOG") == "1"
+	// TB_DALLE_SILENT_LOG=1 we do not mirror logs to stderr.
+	silent := os.Getenv("TB_DALLE_SILENT_LOG") == "1"
 	var serverMW io.Writer
 	if silent {
 		serverMW = fileWriter

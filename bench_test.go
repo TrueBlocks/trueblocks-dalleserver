@@ -15,7 +15,7 @@ func BenchmarkGenerateAnnotatedImage(b *testing.B) {
 		b.Fatal(err)
 	}
 	b.Cleanup(func() { _ = os.RemoveAll(tmp) })
-	_ = os.Setenv("DALLESERVER_DATA_DIR", tmp)
+	_ = os.Setenv("TB_DALLE_DATA_DIR", tmp)
 	// Pre-create output dirs to avoid timing noise
 	_ = os.MkdirAll(filepath.Join(tmp, "output"), 0o750)
 	seriesDir := filepath.Join(tmp, "series")

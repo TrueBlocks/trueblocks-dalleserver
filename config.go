@@ -32,7 +32,7 @@ func LoadConfig() Config {
 		var dataDirFlag string
 		flag.StringVar(&portFlag, "port", "8080", "Port to listen on")
 		flag.StringVar(&lockTTLStr, "lock-ttl", "5m", "TTL for request generation lock")
-		flag.StringVar(&dataDirFlag, "data-dir", "", "Base data directory (overrides DALLESERVER_DATA_DIR)")
+		flag.StringVar(&dataDirFlag, "data-dir", "", "Base data directory (overrides TB_DALLE_DATA_DIR)")
 		// Ignore errors (e.g., repeated parses in tests)
 		if !flag.Parsed() {
 			_ = flag.CommandLine.Parse(os.Args[1:])
@@ -42,16 +42,16 @@ func LoadConfig() Config {
 			ttl = 5 * time.Minute
 		}
 		cfg.Port = ":" + portFlag
-		if envPort := os.Getenv("DALLESERVER_PORT"); envPort != "" {
+		if envPort := os.Getenv("TB_DALLE_PORT"); envPort != "" {
 			cfg.Port = ":" + envPort
 		}
-		cfg.SkipImage = os.Getenv("DALLESERVER_SKIP_IMAGE") == "1"
+		cfg.SkipImage = os.Getenv("TB_DALLE_SKIP_IMAGE") == "1"
 		// Auto-enable skip (mock) if no API key present
 		if os.Getenv("OPENAI_API_KEY") == "" {
 			cfg.SkipImage = true
 		}
 		cfg.LockTTL = ttl
-		dataDir := computeDataDir(dataDirFlag, os.Getenv("DALLESERVER_DATA_DIR"))
+		dataDir := computeDataDir(dataDirFlag, os.Getenv("TB_DALLE_DATA_DIR"))
 		if err := ensureWritable(dataDir); err != nil {
 			// Fall back to a temp directory instead of exiting so tests / server can continue.
 			tmp, terr := os.MkdirTemp("", "dalleserver-fallback-*")

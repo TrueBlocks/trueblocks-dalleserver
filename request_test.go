@@ -16,7 +16,7 @@ func TestParseRequest(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = os.RemoveAll(tmp) })
-	_ = os.Setenv("DALLESERVER_DATA_DIR", tmp)
+	_ = os.Setenv("TB_DALLE_DATA_DIR", tmp)
 	// Ensure basic dirs
 	seriesDir := filepath.Join(tmp, "series")
 	_ = os.MkdirAll(seriesDir, 0o750)
@@ -50,7 +50,7 @@ func TestListSeries(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = os.RemoveAll(tmp) })
-	_ = os.Setenv("DALLESERVER_DATA_DIR", tmp)
+	_ = os.Setenv("TB_DALLE_DATA_DIR", tmp)
 	seriesDir := filepath.Join(tmp, "series")
 	_ = os.MkdirAll(seriesDir, 0o750)
 	_ = os.WriteFile(filepath.Join(seriesDir, "simple.json"), []byte(`{"suffix":"simple"}`), 0o600)

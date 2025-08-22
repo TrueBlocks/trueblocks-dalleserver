@@ -19,7 +19,7 @@ func TestConcurrentGenerate(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = os.RemoveAll(tmp) })
-	_ = os.Setenv("DALLESERVER_DATA_DIR", tmp)
+	_ = os.Setenv("TB_DALLE_DATA_DIR", tmp)
 	_ = os.MkdirAll(filepath.Join(tmp, "output"), 0o750)
 	seriesDir := filepath.Join(tmp, "series")
 	_ = os.MkdirAll(seriesDir, 0o750)
