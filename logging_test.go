@@ -16,14 +16,18 @@ func TestLoggingRotationBasic(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = os.RemoveAll(tmp) })
-	app := &App{Config: Config{DataDir: tmp}}
-	_ = os.MkdirAll(app.OutputDir(), 0o750)
-	_ = os.MkdirAll(app.SeriesDir(), 0o750)
-	app.ValidSeries = dalle.ListSeries(app.SeriesDir())
+	_ = os.Setenv("TB_DALLE_DATA_DIR", tmp)
+	if err := dalle.InitDataDir(""); err != nil {
+		t.Fatalf("InitDataDir: %v", err)
+	}
+	app := &App{Config: LoadConfig()}
+	_ = os.MkdirAll(dalle.OutputDir(), 0o750)
+	_ = os.MkdirAll(dalle.SeriesDir(), 0o750)
+	app.ValidSeries = dalle.ListSeries()
 	app.StartLogging()
 	app.Logf("test line one")
 	app.Logf("test line two")
-	lf := filepath.Join(tmp, "logs", "server.log")
+	lf := filepath.Join(dalle.LogsDir(), "server.log")
 	// lumberjack creates the file lazily on first write; give it a bit more time on slow FS
 	var st os.FileInfo
 	var serr error

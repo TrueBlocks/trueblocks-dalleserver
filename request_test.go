@@ -3,7 +3,6 @@ package main
 import (
 	"net/http"
 	"net/url"
-	"path/filepath"
 	"testing"
 
 	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
@@ -36,9 +35,8 @@ func TestParseRequest(t *testing.T) {
 }
 
 func TestListSeries(t *testing.T) {
-	tmp2 := withTempDataDir(t, map[string]string{"simple": `{"suffix":"simple"}`})
-	seriesDir := filepath.Join(tmp2, "series")
-	list := dalle.ListSeries(seriesDir)
+	_ = withTempDataDir(t, map[string]string{"simple": `{"suffix":"simple"}`})
+	list := dalle.ListSeries()
 	if len(list) == 0 {
 		t.Fatalf("expected at least one series")
 	}

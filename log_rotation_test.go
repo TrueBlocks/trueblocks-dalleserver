@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
 )
 
 // TestLogRotationSmallSize forces rotation by setting size to 1MB and writing >1MB.
@@ -15,11 +17,15 @@ func TestLogRotationSmallSize(t *testing.T) {
 	}
 	defer os.RemoveAll(tmp)
 	_ = os.Setenv("TB_DALLE_SILENT_LOG", "1")
-	app := &App{Config: Config{DataDir: tmp}}
-	if err := os.MkdirAll(app.OutputDir(), 0o750); err != nil {
+	_ = os.Setenv("TB_DALLE_DATA_DIR", tmp)
+	if err := dalle.InitDataDir(""); err != nil {
+		t.Fatalf("InitDataDir: %v", err)
+	}
+	app := &App{Config: LoadConfig()}
+	if err := os.MkdirAll(dalle.OutputDir(), 0o750); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.MkdirAll(app.SeriesDir(), 0o750); err != nil {
+	if err := os.MkdirAll(dalle.SeriesDir(), 0o750); err != nil {
 		t.Fatal(err)
 	}
 	app.StartLogging(1) // 1MB
@@ -34,7 +40,7 @@ func TestLogRotationSmallSize(t *testing.T) {
 	}
 	// Allow flush
 	files := []fs.DirEntry{}
-	logDir := app.LogsDir()
+	logDir := dalle.LogsDir()
 	entries, err := os.ReadDir(logDir)
 	if err != nil {
 		t.Fatalf("ReadDir: %v", err)

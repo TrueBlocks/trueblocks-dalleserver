@@ -17,7 +17,7 @@ GET /series
 ```
 Returns: `Available series: [ ... ]` as a JSON array (pretty-printed inside the line).
 
-Implementation: `handleSeries` calls `dalle.ListSeries("output")` and prints the list.
+Implementation: `handleSeries` calls `dalle.ListSeries()` (no arguments now) and prints the list.
 
 ## Generate or Fetch Image
 ```

@@ -38,27 +38,22 @@ func (c colorStripWriter) Write(p []byte) (int, error) {
 
 func NewApp() *App {
 	app := App{Config: LoadConfig()}
-	// Pre-create derived dirs lazily referenced with least-privilege perms (group-only where needed)
-	_ = os.MkdirAll(app.OutputDir(), 0o750)
-	_ = os.MkdirAll(app.SeriesDir(), 0o750)
-	// Ensure metrics directory lives under DataDir and inform dalle package (treat like other dirs)
-	_ = os.MkdirAll(app.MetricsDir(), 0o750)
-	dalle.SetMetricsDir(app.MetricsDir())
-	app.ValidSeries = dalle.ListSeries(app.SeriesDir())
+	// Pre-create derived dirs lazily referenced with least-privilege perms
+	_ = os.MkdirAll(dalle.OutputDir(), 0o750)
+	_ = os.MkdirAll(dalle.SeriesDir(), 0o750)
+	_ = os.MkdirAll(dalle.MetricsDir(), 0o750)
+	_ = os.MkdirAll(dalle.LogsDir(), 0o750)
+	app.ValidSeries = dalle.ListSeries()
 	return &app
 }
 
-// Helper directory accessors (derived from DataDir)
-func (a *App) DataDir() string    { return a.Config.DataDir }
-func (a *App) OutputDir() string  { return filepath.Join(a.Config.DataDir, "output") }
-func (a *App) SeriesDir() string  { return filepath.Join(a.Config.DataDir, "series") }
-func (a *App) LogsDir() string    { return filepath.Join(a.Config.DataDir, "logs") }
-func (a *App) MetricsDir() string { return filepath.Join(a.Config.DataDir, "metrics") }
-
 // StartLogging initializes the rotating logger. Optionally pass a positive override size (MB) for tests.
 func (a *App) StartLogging(optionalMaxSize ...int) {
-	_ = os.MkdirAll(a.LogsDir(), 0o750)
-	lfPath := filepath.Join(a.LogsDir(), "server.log")
+	_ = os.MkdirAll(dalle.LogsDir(), 0o750)
+	lfPath := filepath.Join(dalle.LogsDir(), "server.log")
+	if f, err := os.OpenFile(lfPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o640); err == nil {
+		_ = f.Close()
+	}
 	maxSize := 50 // default MB
 	if envSz := os.Getenv("TB_DALLE_LOG_MAX_MB"); envSz != "" {
 		if v, err := strconv.Atoi(envSz); err == nil && v > 0 {
@@ -114,7 +109,6 @@ func (a *App) Logf(format string, args ...any) { // convenience
 }
 
 type Request struct {
-	filePath string
 	series   string
 	address  string
 	generate bool
@@ -157,9 +151,7 @@ func (a *App) parseRequest(r *http.Request) (Request, error) {
 	generate := r.URL.Query().Has("generate")
 	remove := r.URL.Query().Has("remove")
 
-	filePath := filepath.Join(a.OutputDir(), series, "annotated", address+".png")
 	return Request{
-		filePath: filePath,
 		series:   series,
 		address:  address,
 		generate: generate,

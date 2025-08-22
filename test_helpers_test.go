@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
 )
 
 // withTempDataDir creates an isolated temporary data directory, sets the
@@ -21,6 +23,11 @@ func withTempDataDir(tb testing.TB, seriesFiles map[string]string) string {
 	}
 	tb.Cleanup(func() { _ = os.RemoveAll(tmp) })
 	_ = os.Setenv("TB_DALLE_DATA_DIR", tmp)
+	if err := dalle.InitDataDir(""); err != nil {
+		// Fail fast if initialization fails
+		os.Unsetenv("TB_DALLE_DATA_DIR")
+		tb.Fatalf("InitDataDir failed: %v", err)
+	}
 	tb.Cleanup(func() { os.Unsetenv("TB_DALLE_DATA_DIR") })
 	if len(seriesFiles) > 0 {
 		seriesDir := filepath.Join(tmp, "series")

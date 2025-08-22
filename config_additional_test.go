@@ -6,23 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
-
-	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
 )
-
-// TestComputeDataDirPrecedence verifies flag > env > default precedence using helper.
-func TestComputeDataDirPrecedence(t *testing.T) {
-	// env only
-	envOnly := dalle.ComputeDataDir("", "/tmp/dalleserver-env-only")
-	if envOnly != "/tmp/dalleserver-env-only" {
-		t.Fatalf("expected env path, got %s", envOnly)
-	}
-	// flag overrides env
-	flagOver := dalle.ComputeDataDir("/tmp/dalleserver-flag", "/tmp/dalleserver-env")
-	if flagOver != "/tmp/dalleserver-flag" {
-		t.Fatalf("expected flag path, got %s", flagOver)
-	}
-}
 
 // TestEnsureWritableCreates ensures directory creation.
 func TestEnsureWritableCreates(t *testing.T) {

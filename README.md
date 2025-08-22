@@ -161,15 +161,16 @@ import (
   "time"
 )
 
-func generateOne(series, addr string, dataDir string) error {
-  outputDir := filepath.Join(dataDir, "output")
-  _ = os.MkdirAll(outputDir, 0o755)
-  _, err := dalle.GenerateAnnotatedImage(series, addr, outputDir, false /* skipImage */, 30*time.Second)
+func generateOne(series, addr string) error {
+  // (Optional) force initialization; otherwise happens on first call:
+  // _ = dalle.InitDataDir("")
+  _, err := dalle.GenerateAnnotatedImage(series, addr, false /* skipImage */, 30*time.Second)
   return err
 }
 ```
 
-Or inside this server, prefer the helpers: `app.OutputDir()` and `app.SeriesDir()`.
+If you need to locate artifacts, call `dalle.DataDir()`; subpaths (`output/`, `series/`)
+are managed internally now (external directory arguments were removed).
 
 ## Logging
 

@@ -26,7 +26,7 @@ func TestConcurrentGenerate(t *testing.T) {
 	for i := 0; i < n; i++ {
 		go func() {
 			defer wg.Done()
-			p, err := dalle.GenerateAnnotatedImage(series, addr, filepath.Join(tmp, "output"), true, 2*time.Second)
+			p, err := dalle.GenerateAnnotatedImage(series, addr, true, 2*time.Second)
 			if err != nil {
 				errs <- err
 				return

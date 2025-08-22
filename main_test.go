@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"testing"
 )
 
@@ -22,10 +21,8 @@ func TestMainRequestRespond(t *testing.T) {
 	req := Request{
 		series:   series,
 		address:  addr,
-		filePath: "testing",
 		generate: true,
 		app:      app,
 	}
-	req.filePath = filepath.Join(app.OutputDir(), req.series, req.address+".png")
 	req.Respond(os.Stdout, nil)
 }

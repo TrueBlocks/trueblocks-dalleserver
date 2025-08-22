@@ -18,7 +18,6 @@ type Config struct {
 	Port      string
 	SkipImage bool
 	LockTTL   time.Duration
-	DataDir   string
 }
 
 // LoadConfig collects configuration from flags and environment.
@@ -53,20 +52,15 @@ func LoadConfig() Config {
 			cfg.SkipImage = true
 		}
 		cfg.LockTTL = ttl
-		dataDir := dalle.ComputeDataDir(dataDirFlag, os.Getenv("TB_DALLE_DATA_DIR"))
-		if err := ensureWritable(dataDir); err != nil {
-			// Fall back to a temp directory instead of exiting so tests / server can continue.
-			tmp, terr := os.MkdirTemp("", "dalleserver-fallback-*")
-			if terr != nil {
-				fmt.Fprintln(os.Stderr, "ERROR: cannot establish writable data dir:", err)
-				// Last resort: keep original (likely failing) path to surface errors later.
-				dataDir = dataDir + "-unwritable"
-			} else {
-				fmt.Fprintln(os.Stderr, "WARNING: using fallback temp data dir due to error:", err)
-				dataDir = tmp
-			}
+		// Initialize the dalle package's internal layout (flag > env > defaults precedence handled internally).
+		if err := dalle.InitDataDir(dataDirFlag); err != nil {
+			fmt.Fprintln(os.Stderr, "ERROR: InitDataDir:", err)
 		}
-		cfg.DataDir = dataDir
+		resolved := dalle.DataDir()
+		if err := ensureWritable(resolved); err != nil {
+			// We cannot change the internal layout after initialization; surface a warning.
+			fmt.Fprintln(os.Stderr, "WARNING: data dir not writable:", err)
+		}
 		cachedConfig = cfg
 	})
 	return cachedConfig

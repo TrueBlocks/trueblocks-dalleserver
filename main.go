@@ -10,6 +10,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
 )
 
 func main() {
@@ -30,7 +32,7 @@ func main() {
 	mux.HandleFunc("/healthz", handleHealth)
 	mux.HandleFunc("/metrics", handleMetrics)
 	mux.HandleFunc("/preview", app.handlePreview)
-	mux.Handle("/files/", http.StripPrefix("/files/", http.FileServer(http.Dir(app.OutputDir()))))
+	mux.Handle("/files/", http.StripPrefix("/files/", http.FileServer(http.Dir(dalle.OutputDir()))))
 
 	port := getPort()
 	srv := &http.Server{

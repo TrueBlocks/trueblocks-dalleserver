@@ -19,7 +19,7 @@ func TestContextEvictionTTL(t *testing.T) {
 	_ = os.MkdirAll(filepath.Join(tmp, "output"), 0o750)
 	seriesA := "simple"
 	addr := "0xf503017d7baf7fbc0fff7492b751025c6a78179b"
-	if _, err := dalle.GenerateAnnotatedImage(seriesA, addr, filepath.Join(tmp, "output"), true, time.Second); err != nil {
+	if _, err := dalle.GenerateAnnotatedImage(seriesA, addr, true, time.Second); err != nil {
 		t.Fatal(err)
 	}
 	if dalle.ContextCount() != 1 {
@@ -28,7 +28,7 @@ func TestContextEvictionTTL(t *testing.T) {
 	// Wait for TTL expiration
 	time.Sleep(250 * time.Millisecond)
 	// Trigger prune by adding another
-	if _, err := dalle.GenerateAnnotatedImage("simple2", addr, filepath.Join(tmp, "output"), true, time.Second); err != nil {
+	if _, err := dalle.GenerateAnnotatedImage("simple2", addr, true, time.Second); err != nil {
 		t.Fatal(err)
 	}
 	if dalle.ContextCount() > 2 {

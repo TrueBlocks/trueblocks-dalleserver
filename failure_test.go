@@ -21,7 +21,7 @@ func TestSimulatedOpenAIFailure(t *testing.T) {
 	// Prepare injection
 	called := 0
 	original := generateAnnotatedImage
-	generateAnnotatedImage = func(series, addr, outputDir string, skip bool, ttl time.Duration) (string, error) {
+	generateAnnotatedImage = func(series, addr string, skip bool, ttl time.Duration) (string, error) {
 		called++
 		return "", fmt.Errorf("forced failure for testing")
 	}
