@@ -53,8 +53,8 @@ func (a *App) StartLogging(optionalMaxSize ...int) {
 	_ = os.MkdirAll(logDir, 0o750)
 	// Construct fixed log file path; base is internal layout (not user-controlled filename)
 	lfPath := filepath.Join(logDir, "server.log")
-	// Touch file to avoid race in tests (controlled path mitigates gosec G304 concern)
-	if f, err := os.OpenFile(lfPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o640); err == nil {
+	// Touch file to avoid race in tests. Path is fixed (not user input) -> suppress G304.
+	if f, err := os.OpenFile(lfPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o640); err == nil { // #nosec G304
 		_ = f.Close()
 	}
 	maxSize := 50 // default MB
