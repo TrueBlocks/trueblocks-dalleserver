@@ -49,8 +49,11 @@ func NewApp() *App {
 
 // StartLogging initializes the rotating logger. Optionally pass a positive override size (MB) for tests.
 func (a *App) StartLogging(optionalMaxSize ...int) {
-	_ = os.MkdirAll(dalle.LogsDir(), 0o750)
-	lfPath := filepath.Join(dalle.LogsDir(), "server.log")
+	logDir := dalle.LogsDir()
+	_ = os.MkdirAll(logDir, 0o750)
+	// Construct fixed log file path; base is internal layout (not user-controlled filename)
+	lfPath := filepath.Join(logDir, "server.log")
+	// Touch file to avoid race in tests (controlled path mitigates gosec G304 concern)
 	if f, err := os.OpenFile(lfPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o640); err == nil {
 		_ = f.Close()
 	}
