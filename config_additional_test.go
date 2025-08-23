@@ -12,18 +12,22 @@ import (
 
 // TestComputeDataDirPrecedence verifies flag > env > default precedence using helper.
 func TestComputeDataDirPrecedence(t *testing.T) {
-	// env only
+	// env only precedence
 	os.Setenv("TB_DALLE_DATA_DIR", "/tmp/dalleserver-env-only")
-	envOnly, _ := dalle.ComputeDataDir("")
-	if envOnly != "/tmp/dalleserver-env-only" {
-		t.Fatalf("expected env path, got %s", envOnly)
+	dalle.TestOnlyResetDataDir() // reset singleton
+	if got := dalle.DataDir(); got != "/tmp/dalleserver-env-only" {
+		t.Fatalf("expected env path, got %s", got)
 	}
-	// flag overrides env
+
+	// flag overrides env on first init
 	os.Setenv("TB_DALLE_DATA_DIR", "/tmp/dalleserver-env")
-	flagOver, _ := dalle.ComputeDataDir("/tmp/dalleserver-flag")
-	if flagOver != "/tmp/dalleserver-flag" {
-		t.Fatalf("expected flag path, got %s", flagOver)
+	dalle.TestOnlyResetDataDir()
+	dalle.ConfigureDataDir("/tmp/dalleserver-flag")
+	if got := dalle.DataDir(); got != "/tmp/dalleserver-flag" { // flag wins
+		t.Fatalf("expected flag path, got %s", got)
 	}
+	// clean
+	os.Unsetenv("TB_DALLE_DATA_DIR")
 }
 
 // TestEnsureWritableCreates ensures directory creation.
