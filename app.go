@@ -41,7 +41,6 @@ func NewApp() *App {
 	// Pre-create derived dirs lazily referenced with least-privilege perms (group-only where needed)
 	_ = os.MkdirAll(app.OutputDir(), 0o750)
 	_ = os.MkdirAll(app.SeriesDir(), 0o750)
-	// Ensure metrics directory lives under DataDir and inform dalle package (treat like other dirs)
 	_ = os.MkdirAll(app.MetricsDir(), 0o750)
 	dalle.SetMetricsDir(app.MetricsDir())
 	app.ValidSeries = dalle.ListSeries(app.SeriesDir())
