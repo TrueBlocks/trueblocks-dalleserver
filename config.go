@@ -16,7 +16,7 @@ type Config struct {
 	Port      string
 	SkipImage bool
 	LockTTL   time.Duration
-	DataDir   string
+	SoonToGo  string
 }
 
 // LoadConfig collects configuration from flags and environment.
@@ -64,7 +64,7 @@ func LoadConfig() Config {
 				dataDir = tmp
 			}
 		}
-		cfg.DataDir = dataDir
+		cfg.SoonToGo = dataDir
 		cachedConfig = cfg
 	})
 	return cachedConfig

@@ -5,40 +5,36 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
 )
 
-// TestLogRotationSmallSize forces rotation by setting size to 1MB and writing >1MB.
+// TestLogRotationSmallSize forces rotation logic by using a very small max size (1MB) and writing enough data.
 func TestLogRotationSmallSize(t *testing.T) {
-	tmp, err := os.MkdirTemp("", "dalleserver-rot-*")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(tmp)
+	// Shared harness: creates isolated TB_DALLE_DATA_DIR with series/output/metrics.
+	_ = dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
 	_ = os.Setenv("TB_DALLE_SILENT_LOG", "1")
-	app := &App{Config: Config{DataDir: tmp}}
-	if err := os.MkdirAll(app.OutputDir(), 0o750); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.MkdirAll(app.SeriesDir(), 0o750); err != nil {
-		t.Fatal(err)
-	}
+	t.Cleanup(func() { _ = os.Unsetenv("TB_DALLE_SILENT_LOG") })
+
+	app := NewApp()     // picks up env-based data dir
 	app.StartLogging(1) // 1MB
 	defer app.StopLogging()
-	// Write ~256KB instead of >1MB – sufficient to exercise rotation logic with small MaxSize
-	chunk := make([]byte, 32*1024) // 32KB
+
+	// Emit ~256KB (8 * 32KB) to exercise rotation path under small max size.
+	chunk := make([]byte, 32*1024)
 	for i := range chunk {
 		chunk[i] = 'a'
 	}
-	for i := 0; i < 8; i++ { // 8 * 32KB = 256KB
+	for i := 0; i < 8; i++ {
 		app.Logf(string(chunk))
 	}
-	// Allow flush
-	files := []fs.DirEntry{}
+
 	logDir := app.LogsDir()
 	entries, err := os.ReadDir(logDir)
 	if err != nil {
 		t.Fatalf("ReadDir: %v", err)
 	}
+	files := []fs.DirEntry{}
 	for _, e := range entries {
 		if !e.IsDir() {
 			files = append(files, e)
@@ -47,7 +43,7 @@ func TestLogRotationSmallSize(t *testing.T) {
 	if len(files) < 1 {
 		t.Fatalf("expected at least one log file")
 	}
-	// It's possible rotation produced server.log + server-*.log
+
 	rotated := false
 	for _, f := range files {
 		if filepath.Ext(f.Name()) == ".log" && f.Name() != "server.log" {
@@ -55,7 +51,7 @@ func TestLogRotationSmallSize(t *testing.T) {
 			break
 		}
 	}
-	// Accept either rotated or single file depending on timing, but ensure size constraint roughly respected
+
 	info, err := os.Stat(filepath.Join(logDir, "server.log"))
 	if err != nil {
 		t.Fatalf("stat server.log: %v", err)
@@ -63,5 +59,5 @@ func TestLogRotationSmallSize(t *testing.T) {
 	if info.Size() == 0 {
 		t.Fatalf("expected non-empty server.log")
 	}
-	_ = rotated // marker to quiet staticcheck if not used; future assertion could require rotation
+	_ = rotated // placeholder for future stricter assertion
 }

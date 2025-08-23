@@ -48,11 +48,11 @@ func NewApp() *App {
 }
 
 // Helper directory accessors (derived from DataDir)
-func (a *App) DataDir() string    { return a.Config.DataDir }
-func (a *App) OutputDir() string  { return filepath.Join(a.Config.DataDir, "output") }
-func (a *App) SeriesDir() string  { return filepath.Join(a.Config.DataDir, "series") }
-func (a *App) LogsDir() string    { return filepath.Join(a.Config.DataDir, "logs") }
-func (a *App) MetricsDir() string { return filepath.Join(a.Config.DataDir, "metrics") }
+func (a *App) DataDir() string    { return a.Config.SoonToGo }
+func (a *App) OutputDir() string  { return filepath.Join(a.DataDir(), "output") }
+func (a *App) SeriesDir() string  { return filepath.Join(a.DataDir(), "series") }
+func (a *App) LogsDir() string    { return filepath.Join(a.DataDir(), "logs") }
+func (a *App) MetricsDir() string { return filepath.Join(a.DataDir(), "metrics") }
 
 // StartLogging initializes the rotating logger. Optionally pass a positive override size (MB) for tests.
 func (a *App) StartLogging(optionalMaxSize ...int) {
