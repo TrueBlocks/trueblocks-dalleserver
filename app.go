@@ -37,22 +37,23 @@ func (c colorStripWriter) Write(p []byte) (int, error) {
 }
 
 func NewApp() *App {
-	app := App{Config: LoadConfig()}
+	app := App{Config: MustLoadConfig()}
+	base := app.Config.SoonToGo
 	// Pre-create derived dirs lazily referenced with least-privilege perms (group-only where needed)
-	_ = os.MkdirAll(app.OutputDir(), 0o750)
-	_ = os.MkdirAll(app.SeriesDir(), 0o750)
-	_ = os.MkdirAll(app.MetricsDir(), 0o750)
-	dalle.SetMetricsDir(app.MetricsDir())
-	app.ValidSeries = dalle.ListSeries(app.SeriesDir())
+	_ = os.MkdirAll(dalle.OutputDir(base), 0o750)
+	_ = os.MkdirAll(dalle.SeriesDir(base), 0o750)
+	_ = os.MkdirAll(dalle.MetricsDir(base), 0o750)
+	dalle.SetMetricsDir(dalle.MetricsDir(base))
+	app.ValidSeries = dalle.ListSeries(dalle.SeriesDir(base))
 	return &app
 }
 
-// Helper directory accessors (derived from DataDir)
+// Helper directory accessors (wrappers kept for backward compatibility)
 func (a *App) DataDir() string    { return a.Config.SoonToGo }
-func (a *App) OutputDir() string  { return filepath.Join(a.DataDir(), "output") }
-func (a *App) SeriesDir() string  { return filepath.Join(a.DataDir(), "series") }
-func (a *App) LogsDir() string    { return filepath.Join(a.DataDir(), "logs") }
-func (a *App) MetricsDir() string { return filepath.Join(a.DataDir(), "metrics") }
+func (a *App) OutputDir() string  { return dalle.OutputDir(a.DataDir()) }
+func (a *App) SeriesDir() string  { return dalle.SeriesDir(a.DataDir()) }
+func (a *App) LogsDir() string    { return dalle.LogsDir(a.DataDir()) }
+func (a *App) MetricsDir() string { return dalle.MetricsDir(a.DataDir()) }
 
 // StartLogging initializes the rotating logger. Optionally pass a positive override size (MB) for tests.
 func (a *App) StartLogging(optionalMaxSize ...int) {

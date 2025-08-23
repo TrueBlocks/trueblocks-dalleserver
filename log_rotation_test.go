@@ -11,7 +11,6 @@ import (
 
 // TestLogRotationSmallSize forces rotation logic by using a very small max size (1MB) and writing enough data.
 func TestLogRotationSmallSize(t *testing.T) {
-	// Shared harness: creates isolated TB_DALLE_DATA_DIR with series/output/metrics.
 	_ = dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
 	_ = os.Setenv("TB_DALLE_SILENT_LOG", "1")
 	t.Cleanup(func() { _ = os.Unsetenv("TB_DALLE_SILENT_LOG") })
