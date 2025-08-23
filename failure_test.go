@@ -5,25 +5,17 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 	"time"
+
+	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
 )
 
 // TestSimulatedOpenAIFailure injects a failing generateAnnotatedImage to ensure the handler
 // logs the error path without panicking and still responds 200 with standard message.
 func TestSimulatedOpenAIFailure(t *testing.T) {
-	tmp, err := os.MkdirTemp("", "dalleserver-test-*")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = os.RemoveAll(tmp) })
-	_ = os.Setenv("TB_DALLE_DATA_DIR", tmp)
-	seriesDir := filepath.Join(tmp, "series")
-	_ = os.MkdirAll(seriesDir, 0o750)
-	_ = os.WriteFile(filepath.Join(seriesDir, "simple.json"), []byte(`{"suffix":"simple"}`), 0o600)
+	_ = dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
 	app := NewApp()
 	app.StartLogging()
 	defer app.StopLogging()
@@ -48,11 +40,11 @@ func TestSimulatedOpenAIFailure(t *testing.T) {
 	r := httptest.NewRequest(http.MethodGet, url, nil)
 	w := httptest.NewRecorder()
 	app.handleDalleDress(w, r)
-	res := w.Result()
-	if res.StatusCode != http.StatusOK {
-		t.Fatalf("expected 200, got %d", res.StatusCode)
+	resp := w.Result()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected 200, got %d", resp.StatusCode)
 	}
-	bodyBytes, _ := io.ReadAll(res.Body)
+	bodyBytes, _ := io.ReadAll(resp.Body)
 	body := string(bodyBytes)
 	trimmed := strings.TrimSpace(body)
 	// Handler now always returns JSON progress (or {} if no progress yet) instead of a static message.

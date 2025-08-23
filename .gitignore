@@ -1,5 +1,6 @@
-.DS_Store
+dalleserver
 trueblocks-dalleserver
+.DS_Store
 ai
 server.log
 *.exe

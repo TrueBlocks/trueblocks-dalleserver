@@ -5,20 +5,15 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
 )
 
 func TestMainRequestRespond(t *testing.T) {
-	_ = os.Setenv("TB_DALLE_SKIP_IMAGE", "1")
-	defer os.Unsetenv("TB_DALLE_SKIP_IMAGE")
 	cwd, _ := os.Getwd()
 	fmt.Println(cwd)
 	isDebugging = true
-	tmp, err := os.MkdirTemp("", "dalleserver-test-*")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = os.RemoveAll(tmp) })
-	_ = os.Setenv("TB_DALLE_DATA_DIR", tmp)
+	_ = dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
 	app := NewApp()
 	app.StartLogging()
 	defer app.StopLogging()
@@ -27,10 +22,9 @@ func TestMainRequestRespond(t *testing.T) {
 	req := Request{
 		series:   series,
 		address:  addr,
-		filePath: "testing",
+		filePath: filepath.Join(app.OutputDir(), series, addr+".png"),
 		generate: true,
 		app:      app,
 	}
-	req.filePath = filepath.Join(app.OutputDir(), req.series, req.address+".png")
 	req.Respond(os.Stdout, nil)
 }
