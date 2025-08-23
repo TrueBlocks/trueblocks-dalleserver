@@ -39,17 +39,16 @@ func (c colorStripWriter) Write(p []byte) (int, error) {
 func NewApp() *App {
 	app := App{Config: MustLoadConfig()}
 	_ = os.MkdirAll(dalle.OutputDir(), 0o750)
-	_ = os.MkdirAll(dalle.SeriesDir(), 0o750)
-	_ = os.MkdirAll(dalle.MetricsDir(), 0o750)
-	dalle.SetMetricsDir(dalle.MetricsDir())
-	app.ValidSeries = dalle.ListSeries(dalle.SeriesDir())
+	app.ValidSeries = dalle.ListSeries()
 	return &app
 }
 
+func logsDir() string { return filepath.Join(dalle.DataDir(), "logs") }
+
 // StartLogging initializes the rotating logger. Optionally pass a positive override size (MB) for tests.
 func (a *App) StartLogging(optionalMaxSize ...int) {
-	_ = os.MkdirAll(dalle.LogsDir(), 0o750)
-	lfPath := filepath.Join(dalle.LogsDir(), "server.log")
+	_ = os.MkdirAll(logsDir(), 0o750)
+	lfPath := filepath.Join(logsDir(), "server.log")
 	maxSize := 50 // default MB
 	if envSz := os.Getenv("TB_DALLE_LOG_MAX_MB"); envSz != "" {
 		if v, err := strconv.Atoi(envSz); err == nil && v > 0 {
@@ -105,7 +104,6 @@ func (a *App) Logf(format string, args ...any) { // convenience
 }
 
 type Request struct {
-	filePath string
 	series   string
 	address  string
 	generate bool
@@ -148,9 +146,7 @@ func (a *App) parseRequest(r *http.Request) (Request, error) {
 	generate := r.URL.Query().Has("generate")
 	remove := r.URL.Query().Has("remove")
 
-	filePath := filepath.Join(dalle.OutputDir(), series, "annotated", address+".png")
 	return Request{
-		filePath: filePath,
 		series:   series,
 		address:  address,
 		generate: generate,

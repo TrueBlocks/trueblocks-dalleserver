@@ -11,7 +11,7 @@ import (
 
 // TestLogRotationSmallSize forces rotation logic by using a very small max size (1MB) and writing enough data.
 func TestLogRotationSmallSize(t *testing.T) {
-	_ = dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
+	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
 	_ = os.Setenv("TB_DALLE_SILENT_LOG", "1")
 	t.Cleanup(func() { _ = os.Unsetenv("TB_DALLE_SILENT_LOG") })
 
@@ -28,8 +28,7 @@ func TestLogRotationSmallSize(t *testing.T) {
 		app.Logf(string(chunk))
 	}
 
-	logDir := dalle.LogsDir()
-	entries, err := os.ReadDir(logDir)
+	entries, err := os.ReadDir(logsDir())
 	if err != nil {
 		t.Fatalf("ReadDir: %v", err)
 	}
@@ -51,7 +50,7 @@ func TestLogRotationSmallSize(t *testing.T) {
 		}
 	}
 
-	info, err := os.Stat(filepath.Join(logDir, "server.log"))
+	info, err := os.Stat(filepath.Join(logsDir(), "server.log"))
 	if err != nil {
 		t.Fatalf("stat server.log: %v", err)
 	}

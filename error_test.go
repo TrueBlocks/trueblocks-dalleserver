@@ -12,7 +12,7 @@ import (
 
 // Test error paths on the /dalle/ handler surface proper 400s with expected messages.
 func TestHandleDalleErrors(t *testing.T) {
-	_ = dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
+	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
 	app := NewApp()
 	app.StartLogging()
 	defer app.StopLogging()

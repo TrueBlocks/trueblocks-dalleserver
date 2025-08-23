@@ -9,7 +9,7 @@ import (
 )
 
 func TestParseRequest(t *testing.T) {
-	_ = dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
+	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
 	app := NewApp()
 	cases := []struct {
 		path      string
@@ -34,8 +34,8 @@ func TestParseRequest(t *testing.T) {
 }
 
 func TestListSeries(t *testing.T) {
-	st := dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
-	list := dalle.ListSeries(st.SeriesDir)
+	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
+	list := dalle.ListSeries()
 	if len(list) == 0 {
 		t.Fatalf("expected at least one series")
 	}

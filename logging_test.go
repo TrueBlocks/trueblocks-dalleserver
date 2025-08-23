@@ -11,7 +11,7 @@ import (
 
 // TestLoggingRotationBasic ensures the rotating logger writes the initial file.
 func TestLoggingRotationBasic(t *testing.T) {
-	_ = dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
+	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
 	_ = os.Setenv("TB_DALLE_SILENT_LOG", "1")
 	t.Cleanup(func() { _ = os.Unsetenv("TB_DALLE_SILENT_LOG") })
 
@@ -20,8 +20,7 @@ func TestLoggingRotationBasic(t *testing.T) {
 	defer app.StopLogging()
 	app.Logf("test line one")
 	app.Logf("test line two")
-	lf := filepath.Join(dalle.LogsDir(), "server.log")
-	// lumberjack creates the file lazily on first write; allow retries up to ~1s
+	lf := filepath.Join(logsDir(), "server.log")
 	var st os.FileInfo
 	var serr error
 	for i := 0; i < 50; i++ {

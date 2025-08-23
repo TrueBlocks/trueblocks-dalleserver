@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"testing"
 
 	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
@@ -13,7 +12,7 @@ func TestMainRequestRespond(t *testing.T) {
 	cwd, _ := os.Getwd()
 	fmt.Println(cwd)
 	isDebugging = true
-	_ = dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
+	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
 	app := NewApp()
 	app.StartLogging()
 	defer app.StopLogging()
@@ -22,7 +21,6 @@ func TestMainRequestRespond(t *testing.T) {
 	req := Request{
 		series:   series,
 		address:  addr,
-		filePath: filepath.Join(dalle.OutputDir(), series, addr+".png"),
 		generate: true,
 		app:      app,
 	}

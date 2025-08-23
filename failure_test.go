@@ -15,7 +15,7 @@ import (
 // TestSimulatedOpenAIFailure injects a failing generateAnnotatedImage to ensure the handler
 // logs the error path without panicking and still responds 200 with standard message.
 func TestSimulatedOpenAIFailure(t *testing.T) {
-	_ = dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
+	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
 	app := NewApp()
 	app.StartLogging()
 	defer app.StopLogging()
@@ -23,7 +23,7 @@ func TestSimulatedOpenAIFailure(t *testing.T) {
 	// Prepare injection
 	called := 0
 	original := generateAnnotatedImage
-	generateAnnotatedImage = func(series, addr, outputDir string, skip bool, ttl time.Duration) (string, error) {
+	generateAnnotatedImage = func(series, addr string, skip bool, ttl time.Duration) (string, error) {
 		called++
 		return "", fmt.Errorf("forced failure for testing")
 	}

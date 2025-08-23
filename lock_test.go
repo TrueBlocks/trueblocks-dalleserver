@@ -1,7 +1,6 @@
 package main
 
 import (
-	"path/filepath"
 	"sync"
 	"testing"
 	"time"
@@ -12,7 +11,7 @@ import (
 // TestConcurrentGenerate ensures lock prevents redundant heavy work; we just assert no errors and same path.
 func TestConcurrentGenerate(t *testing.T) {
 	dalle.ConfigureManager(dalle.ManagerOptions{MaxContexts: 5, ContextTTL: time.Minute})
-	st := dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
+	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
 	series := "simple"
 	addr := "0xf503017d7baf7fbc0fff7492b751025c6a78179b"
 	const n = 10
@@ -23,7 +22,7 @@ func TestConcurrentGenerate(t *testing.T) {
 	for i := 0; i < n; i++ {
 		go func() {
 			defer wg.Done()
-			p, err := dalle.GenerateAnnotatedImage(series, addr, filepath.Join(st.TmpDir, "output"), true, 2*time.Second)
+			p, err := dalle.GenerateAnnotatedImage(series, addr, true, 2*time.Second)
 			if err != nil {
 				errs <- err
 				return
