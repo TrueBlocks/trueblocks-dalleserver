@@ -16,7 +16,6 @@ type Config struct {
 	Port      string
 	SkipImage bool
 	LockTTL   time.Duration
-	SoonToGo  string
 }
 
 var loadConfigOnce sync.Once
@@ -52,7 +51,8 @@ func MustLoadConfig() Config {
 		}
 		cfg.LockTTL = ttl
 
-		cfg.SoonToGo, _ = dalle.ComputeDataDir(dataDirFlag)
+		// Set base data directory inside dalle lazily via provided flag (environment fallback inside package).
+		dalle.ConfigureDataDir(dataDirFlag)
 
 		cachedConfig = cfg
 	})

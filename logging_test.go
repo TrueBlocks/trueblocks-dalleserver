@@ -20,7 +20,7 @@ func TestLoggingRotationBasic(t *testing.T) {
 	defer app.StopLogging()
 	app.Logf("test line one")
 	app.Logf("test line two")
-	lf := filepath.Join(app.LogsDir(), "server.log")
+	lf := filepath.Join(dalle.LogsDir(), "server.log")
 	// lumberjack creates the file lazily on first write; allow retries up to ~1s
 	var st os.FileInfo
 	var serr error

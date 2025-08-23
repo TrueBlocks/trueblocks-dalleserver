@@ -10,7 +10,7 @@ import (
 
 func (a *App) handleSeries(w http.ResponseWriter, r *http.Request) {
 	a.Logger.Printf("Received request: %s %s", r.Method, r.URL.Path)
-	seriesList := dalle.ListSeries(a.SeriesDir())
+	seriesList := dalle.ListSeries(dalle.SeriesDir())
 	bytes, _ := json.MarshalIndent(seriesList, "", "  ")
 	fmt.Fprintln(w, "Available series: ", string(bytes))
 }

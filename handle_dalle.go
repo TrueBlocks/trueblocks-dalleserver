@@ -57,14 +57,14 @@ func (req *Request) Respond(w io.Writer, r *http.Request) {
 		req.app.Logger.Println("starting generation goroutine (if lock acquired)")
 		go func(series, addr string) {
 			start := time.Now()
-			if _, err := generateAnnotatedImage(series, addr, req.app.OutputDir(), req.app.Config.SkipImage || os.Getenv("TB_DALLE_SKIP_IMAGE") == "1", req.app.Config.LockTTL); err != nil {
+			if _, err := generateAnnotatedImage(series, addr, dalle.OutputDir(), req.app.Config.SkipImage || os.Getenv("TB_DALLE_SKIP_IMAGE") == "1", req.app.Config.LockTTL); err != nil {
 				req.app.Logger.Println("error generating image:", err)
 			} else {
 				req.app.Logger.Printf("generated image for %s/%s in %s", series, addr, time.Since(start))
 			}
 		}(req.series, req.address)
 	} else {
-		if _, err := generateAnnotatedImage(req.series, req.address, req.app.OutputDir(), req.app.Config.SkipImage || os.Getenv("TB_DALLE_SKIP_IMAGE") == "1", req.app.Config.LockTTL); err != nil {
+		if _, err := generateAnnotatedImage(req.series, req.address, dalle.OutputDir(), req.app.Config.SkipImage || os.Getenv("TB_DALLE_SKIP_IMAGE") == "1", req.app.Config.LockTTL); err != nil {
 			req.app.Logger.Println("error generating image:", err)
 		}
 	}

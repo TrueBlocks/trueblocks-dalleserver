@@ -38,27 +38,18 @@ func (c colorStripWriter) Write(p []byte) (int, error) {
 
 func NewApp() *App {
 	app := App{Config: MustLoadConfig()}
-	base := app.Config.SoonToGo
-	// Pre-create derived dirs lazily referenced with least-privilege perms (group-only where needed)
-	_ = os.MkdirAll(dalle.OutputDir(base), 0o750)
-	_ = os.MkdirAll(dalle.SeriesDir(base), 0o750)
-	_ = os.MkdirAll(dalle.MetricsDir(base), 0o750)
-	dalle.SetMetricsDir(dalle.MetricsDir(base))
-	app.ValidSeries = dalle.ListSeries(dalle.SeriesDir(base))
+	_ = os.MkdirAll(dalle.OutputDir(), 0o750)
+	_ = os.MkdirAll(dalle.SeriesDir(), 0o750)
+	_ = os.MkdirAll(dalle.MetricsDir(), 0o750)
+	dalle.SetMetricsDir(dalle.MetricsDir())
+	app.ValidSeries = dalle.ListSeries(dalle.SeriesDir())
 	return &app
 }
 
-// Helper directory accessors (wrappers kept for backward compatibility)
-func (a *App) DataDir() string    { return a.Config.SoonToGo }
-func (a *App) OutputDir() string  { return dalle.OutputDir(a.DataDir()) }
-func (a *App) SeriesDir() string  { return dalle.SeriesDir(a.DataDir()) }
-func (a *App) LogsDir() string    { return dalle.LogsDir(a.DataDir()) }
-func (a *App) MetricsDir() string { return dalle.MetricsDir(a.DataDir()) }
-
 // StartLogging initializes the rotating logger. Optionally pass a positive override size (MB) for tests.
 func (a *App) StartLogging(optionalMaxSize ...int) {
-	_ = os.MkdirAll(a.LogsDir(), 0o750)
-	lfPath := filepath.Join(a.LogsDir(), "server.log")
+	_ = os.MkdirAll(dalle.LogsDir(), 0o750)
+	lfPath := filepath.Join(dalle.LogsDir(), "server.log")
 	maxSize := 50 // default MB
 	if envSz := os.Getenv("TB_DALLE_LOG_MAX_MB"); envSz != "" {
 		if v, err := strconv.Atoi(envSz); err == nil && v > 0 {
@@ -157,7 +148,7 @@ func (a *App) parseRequest(r *http.Request) (Request, error) {
 	generate := r.URL.Query().Has("generate")
 	remove := r.URL.Query().Has("remove")
 
-	filePath := filepath.Join(a.OutputDir(), series, "annotated", address+".png")
+	filePath := filepath.Join(dalle.OutputDir(), series, "annotated", address+".png")
 	return Request{
 		filePath: filePath,
 		series:   series,

@@ -22,7 +22,7 @@ func TestMainRequestRespond(t *testing.T) {
 	req := Request{
 		series:   series,
 		address:  addr,
-		filePath: filepath.Join(app.OutputDir(), series, addr+".png"),
+		filePath: filepath.Join(dalle.OutputDir(), series, addr+".png"),
 		generate: true,
 		app:      app,
 	}

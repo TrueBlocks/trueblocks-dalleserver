@@ -28,7 +28,7 @@ func TestLogRotationSmallSize(t *testing.T) {
 		app.Logf(string(chunk))
 	}
 
-	logDir := app.LogsDir()
+	logDir := dalle.LogsDir()
 	entries, err := os.ReadDir(logDir)
 	if err != nil {
 		t.Fatalf("ReadDir: %v", err)
