@@ -9,6 +9,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
 )
 
 // Config holds runtime configuration.
@@ -51,7 +53,7 @@ func LoadConfig() Config {
 			cfg.SkipImage = true
 		}
 		cfg.LockTTL = ttl
-		dataDir := computeDataDir(dataDirFlag, os.Getenv("TB_DALLE_DATA_DIR"))
+		dataDir := dalle.ComputeDataDir(dataDirFlag, os.Getenv("TB_DALLE_DATA_DIR"))
 		if err := ensureWritable(dataDir); err != nil {
 			// Fall back to a temp directory instead of exiting so tests / server can continue.
 			tmp, terr := os.MkdirTemp("", "dalleserver-fallback-*")
@@ -68,29 +70,6 @@ func LoadConfig() Config {
 		cachedConfig = cfg
 	})
 	return cachedConfig
-}
-
-// computeDataDir resolves a base data directory using precedence: explicit flag > env > default (under home).
-// Exposed for tests.
-func computeDataDir(flagVal, envVal string) string {
-	dataDir := flagVal
-	if dataDir == "" {
-		dataDir = envVal
-	}
-	if dataDir == "" {
-		home, herr := os.UserHomeDir()
-		if herr != nil || home == "" {
-			home = "."
-		}
-		dataDir = filepath.Join(home, ".local", "share", "trueblocks", "dalle")
-	}
-	dataDir = filepath.Clean(dataDir)
-	if !filepath.IsAbs(dataDir) {
-		if abs, aerr := filepath.Abs(dataDir); aerr == nil {
-			dataDir = abs
-		}
-	}
-	return dataDir
 }
 
 // ensureWritable makes sure directory exists and is writable.
