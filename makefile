@@ -1,7 +1,7 @@
 all:
 	go build ./...
 
-run:
+serve:
 	$(MAKE) -j 12 all
 	go run .
 
