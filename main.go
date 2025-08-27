@@ -24,7 +24,7 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/{$}", app.handleDefault)
+	mux.HandleFunc("/", app.handleDefault)
 	mux.HandleFunc("/dalle/", app.handleDalleDress)
 	mux.HandleFunc("/series", app.handleSeries)
 	mux.HandleFunc("/series/", app.handleSeries)

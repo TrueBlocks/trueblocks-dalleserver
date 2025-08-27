@@ -75,14 +75,11 @@ func (a *App) parseRequest(r *http.Request) (Request, error) {
 		return Request{}, fmt.Errorf("invalid address")
 	}
 
-	generate := r.URL.Query().Get("generate") == "1"
-	remove := r.URL.Query().Has("remove")
-
 	return Request{
 		series:   series,
 		address:  address,
-		generate: generate,
-		remove:   remove,
+		generate: r.URL.Query().Get("generate") == "1",
+		remove:   r.URL.Query().Has("remove"),
 		app:      a,
 	}, nil
 }
