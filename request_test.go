@@ -9,16 +9,16 @@ import (
 )
 
 func TestParseRequest(t *testing.T) {
-	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
+	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"empty"}})
 	app := NewApp()
 	cases := []struct {
 		path      string
 		expectErr bool
 	}{
-		{"/dalle/simple/0xf503017d7baf7fbc0fff7492b751025c6a78179b", false},
+		{"/dalle/empty/0xf503017d7baf7fbc0fff7492b751025c6a78179b", false},
 		{"/dalle//0xf503017d7baf7fbc0fff7492b751025c6a78179b", true},
-		{"/dalle/simple/0xdeadbeef", true},
-		{"/dalle/simple/", true},
+		{"/dalle/empty/0xdeadbeef", true},
+		{"/dalle/empty/", true},
 	}
 	for _, c := range cases {
 		reqUrl, _ := url.Parse(c.path)
@@ -34,7 +34,7 @@ func TestParseRequest(t *testing.T) {
 }
 
 func TestListSeries(t *testing.T) {
-	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
+	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"empty"}})
 	list := dalle.ListSeries()
 	if len(list) == 0 {
 		t.Fatalf("expected at least one series")

@@ -11,7 +11,7 @@ import (
 
 // TestLoggingRotationBasic ensures the rotating logger writes the initial file.
 func TestLoggingRotationBasic(t *testing.T) {
-	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
+	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"empty"}})
 	_ = os.Setenv("TB_DALLE_SILENT_LOG", "1")
 	t.Cleanup(func() { _ = os.Unsetenv("TB_DALLE_SILENT_LOG") })
 

@@ -12,7 +12,7 @@ import (
 
 // Test error paths on the /dalle/ handler surface proper 400s with expected messages.
 func TestHandleDalleErrors(t *testing.T) {
-	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
+	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"empty"}})
 	app := NewApp()
 	app.StartLogging()
 	defer app.StopLogging()
@@ -24,8 +24,8 @@ func TestHandleDalleErrors(t *testing.T) {
 		wantSubstr string
 	}{
 		{"invalid series", "/dalle/notaseries/0xf503017d7baf7fbc0fff7492b751025c6a78179b", http.StatusBadRequest, "invalid series"},
-		{"malformed address", "/dalle/simple/0xdeadbeef", http.StatusBadRequest, "invalid address"},
-		{"missing address", "/dalle/simple/", http.StatusBadRequest, "address is required"},
+		{"malformed address", "/dalle/empty/0xdeadbeef", http.StatusBadRequest, "invalid address"},
+		{"missing address", "/dalle/empty/", http.StatusBadRequest, "address is required"},
 		{"missing both", "/dalle/", http.StatusBadRequest, "invalid request"},
 	}
 

@@ -11,8 +11,8 @@ import (
 // TestConcurrentGenerate ensures lock prevents redundant heavy work; we just assert no errors and same path.
 func TestConcurrentGenerate(t *testing.T) {
 	dalle.ConfigureManager(dalle.ManagerOptions{MaxContexts: 5, ContextTTL: time.Minute})
-	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
-	series := "simple"
+	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"empty"}})
+	series := "empty"
 	addr := "0xf503017d7baf7fbc0fff7492b751025c6a78179b"
 	const n = 10
 	var wg sync.WaitGroup

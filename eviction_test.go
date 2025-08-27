@@ -9,8 +9,8 @@ import (
 
 func TestContextEvictionTTL(t *testing.T) {
 	dalle.ConfigureManager(dalle.ManagerOptions{MaxContexts: 2, ContextTTL: 200 * time.Millisecond})
-	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple", "simple2"}})
-	seriesA := "simple"
+	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"empty", "empty2"}})
+	seriesA := "empty"
 	addr := "0xf503017d7baf7fbc0fff7492b751025c6a78179b"
 	if _, err := dalle.GenerateAnnotatedImage(seriesA, addr, true, time.Second); err != nil {
 		t.Fatal(err)
@@ -21,7 +21,7 @@ func TestContextEvictionTTL(t *testing.T) {
 	// Wait for TTL expiration
 	time.Sleep(250 * time.Millisecond)
 	// Trigger prune by adding another
-	if _, err := dalle.GenerateAnnotatedImage("simple2", addr, true, time.Second); err != nil {
+	if _, err := dalle.GenerateAnnotatedImage("empty2", addr, true, time.Second); err != nil {
 		t.Fatal(err)
 	}
 	if dalle.ContextCount() > 2 {

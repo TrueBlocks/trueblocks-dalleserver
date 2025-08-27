@@ -15,7 +15,7 @@ import (
 // TestSimulatedOpenAIFailure injects a failing generateAnnotatedImage to ensure the handler
 // logs the error path without panicking and still responds 200 with standard message.
 func TestSimulatedOpenAIFailure(t *testing.T) {
-	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"simple"}})
+	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"empty"}})
 	app := NewApp()
 	app.StartLogging()
 	defer app.StopLogging()
@@ -36,7 +36,7 @@ func TestSimulatedOpenAIFailure(t *testing.T) {
 
 	// Use a unique address unlikely to have prior progress to better isolate this test
 	addr := "0x5555555555555555555555555555555555555555"
-	url := "/dalle/simple/" + addr + "?generate=1"
+	url := "/dalle/empty/" + addr + "?generate=1"
 	r := httptest.NewRequest(http.MethodGet, url, nil)
 	w := httptest.NewRecorder()
 	app.handleDalleDress(w, r)
