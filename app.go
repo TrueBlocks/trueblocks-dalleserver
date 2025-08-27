@@ -1,14 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -29,11 +27,12 @@ type App struct {
 // colorStripWriter removes ANSI escape sequences before writing (used for file logs).
 type colorStripWriter struct{ w io.Writer }
 
-var ansiRegexp = regexp.MustCompile(`\x1b\[[0-9;]*m`)
+// var ansiRegexp = regexp.MustCompile(`\x1b\[[0-9;]*m`)
 
 func (c colorStripWriter) Write(p []byte) (int, error) {
-	clean := ansiRegexp.ReplaceAll(p, nil)
-	return c.w.Write(clean)
+	// clean := ansiRegexp.ReplaceAll(p, nil)
+	// return c.w.Write(clean)
+	return c.w.Write(p)
 }
 
 func NewApp() *App {
@@ -112,8 +111,12 @@ type Request struct {
 }
 
 func (r *Request) String() string {
-	bytes, _ := json.MarshalIndent(r, "", "  ")
-	return string(bytes)
+	return fmt.Sprintf(`{
+  "series": "%s",
+  "address": "%s",
+  "generate": %t,
+  "remove": %t
+}`, r.series, r.address, r.generate, r.remove)
 }
 
 func (a *App) parseRequest(r *http.Request) (Request, error) {
@@ -139,11 +142,8 @@ func (a *App) parseRequest(r *http.Request) (Request, error) {
 	if !base.IsValidAddress(address) {
 		return Request{}, fmt.Errorf("invalid address")
 	}
-	// Normalize to checksum format for canonical storage / filenames (EIP-55 via go-ethereum)
-	addr := base.HexToAddress(address)
-	address = addr.Hex()
 
-	generate := r.URL.Query().Has("generate")
+	generate := r.URL.Query().Get("generate") == "1"
 	remove := r.URL.Query().Has("remove")
 
 	return Request{

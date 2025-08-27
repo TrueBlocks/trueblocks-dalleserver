@@ -21,7 +21,6 @@ var generateAnnotatedImage = dalle.GenerateAnnotatedImage
 func (a *App) handleDalleDress(w http.ResponseWriter, r *http.Request) {
 	a.Logger.Printf("Received request: %s %s", r.Method, r.URL.Path)
 	req, err := a.parseRequest(r)
-	a.Logger.Printf("Req: %s", req.String())
 	if err != nil {
 		a.Logger.Printf("Err: %s", err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -31,7 +30,9 @@ func (a *App) handleDalleDress(w http.ResponseWriter, r *http.Request) {
 }
 
 func (req *Request) Respond(w io.Writer, r *http.Request) {
-	filePath := filepath.Join(dalle.OutputDir(), req.series, "annotated", req.address+".png")
+	series := req.series
+	addr := req.address
+	filePath := filepath.Join(dalle.OutputDir(), series, "annotated", addr+".png")
 	exists := file.FileExists(filePath)
 	if req.remove {
 		if !exists {
@@ -43,20 +44,18 @@ func (req *Request) Respond(w io.Writer, r *http.Request) {
 		return
 	}
 
-	// If the file already exists and we're not told to generate it, serve it
 	req.app.Logger.Println("exists:", exists)
 	req.app.Logger.Println("generate:", req.generate)
 	if exists && !req.generate {
 		if rw, ok := w.(http.ResponseWriter); ok {
 			req.app.Logger.Println("the image exists, serving it")
-			filePath := filepath.Join(dalle.OutputDir(), req.series, "annotated", req.address+".png")
+			filePath := filepath.Join(dalle.OutputDir(), series, "annotated", addr+".png")
 			http.ServeFile(rw, r, filePath)
 			return
 		}
 	}
 
 	if !isDebugging {
-		// start generation asynchronously if not already in progress
 		req.app.Logger.Println("starting generation goroutine (if lock acquired)")
 		go func(series, addr string) {
 			start := time.Now()
@@ -65,15 +64,15 @@ func (req *Request) Respond(w io.Writer, r *http.Request) {
 			} else {
 				req.app.Logger.Printf("generated image for %s/%s in %s", series, addr, time.Since(start))
 			}
-		}(req.series, req.address)
+		}(series, addr)
 	} else {
-		if _, err := generateAnnotatedImage(req.series, req.address, req.app.Config.SkipImage || os.Getenv("TB_DALLE_SKIP_IMAGE") == "1", req.app.Config.LockTTL); err != nil {
+		if _, err := generateAnnotatedImage(series, addr, req.app.Config.SkipImage || os.Getenv("TB_DALLE_SKIP_IMAGE") == "1", req.app.Config.LockTTL); err != nil {
 			req.app.Logger.Println("error generating image:", err)
 		}
 	}
 
 	// Always attempt to fetch progress (may be nil if run not started yet)
-	pr := dalle.GetProgress(req.series, req.address)
+	pr := dalle.GetProgress(series, addr)
 	if pr == nil {
 		fmt.Fprintln(w, "{}")
 		return
