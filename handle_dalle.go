@@ -32,17 +32,15 @@ func (a *App) handleDalleDress(w http.ResponseWriter, r *http.Request) {
 func (req *Request) Respond(w io.Writer, r *http.Request) {
 	filePath := filepath.Join(dalle.OutputDir(), req.series, "annotated", req.address+".png")
 	exists := file.FileExists(filePath)
-	if req.remove {
-		if !exists {
-			fmt.Fprintln(w, "Image not found")
-			return
-		}
+	if exists && req.remove {
 		_ = os.Remove(filePath)
-		fmt.Fprintln(w, "Image removed")
+		fmt.Fprintln(w, "image removed", filePath)
 		return
 	}
 
-	if exists && !req.generate {
+	if req.generate {
+		dalle.Clean(req.series, req.address)
+	} else if exists {
 		if rw, ok := w.(http.ResponseWriter); ok {
 			filePath := filepath.Join(dalle.OutputDir(), req.series, "annotated", req.address+".png")
 			http.ServeFile(rw, r, filePath)
@@ -50,15 +48,11 @@ func (req *Request) Respond(w io.Writer, r *http.Request) {
 		}
 	}
 
-	if req.generate {
-		dalle.Clean(req.series, req.address)
-	}
-
 	if rw, ok := w.(http.ResponseWriter); ok {
 		rw.Header().Set("Content-Type", "application/json")
 	}
-	pr := dalle.GetProgress(req.series, req.address)
 
+	pr := dalle.GetProgress(req.series, req.address)
 	if !isDebugging {
 		if pr != nil && !pr.Done && !req.generate {
 			logger.Info("generation already active; not spawning duplicate goroutine")
