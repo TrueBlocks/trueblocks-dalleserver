@@ -5,6 +5,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/colors"
 	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/logger"
 	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
 )
@@ -84,16 +85,16 @@ func startStatusPrinter(interval time.Duration) {
 				logger.Info("")
 			}
 			for _, r := range rows {
-		       logger.Info(fmt.Sprintf("%-*s  %-*s  %-*s  %*s  %-*s  %-*s  %-*s  %-*s",
-			       w.phase, r.phase,
-			       w.address, r.address,
-			       w.series, r.series,
-			       w.pct, r.pct,
-			       w.eta, r.eta,
-			       w.elapsed, r.elapsed,
-			       w.cache, r.cache,
-			       w.err, r.err,
-		       ))
+				logger.Info(fmt.Sprintf(colors.BrightYellow+"%-*s  %-*s  %-*s  %*s  %-*s  %-*s  %-*s  %-*s"+colors.Off,
+					w.phase, r.phase,
+					w.address, r.address,
+					w.pct, r.pct,
+					w.eta, r.eta,
+					w.elapsed, r.elapsed,
+					w.series, r.series,
+					w.cache, r.cache,
+					w.err, r.err,
+				))
 			}
 		}
 	}
