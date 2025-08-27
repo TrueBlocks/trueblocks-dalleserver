@@ -1,7 +1,7 @@
 all:
 	go build ./...
 
-run:
+serve:
 	$(MAKE) -j 12 all
 	go run .
 
@@ -9,8 +9,8 @@ lint:
 	golangci-lint run ./...
 
 test:
-	@TB_DALLE_SKIP_IMAGE=1 go test --count=1 ./...
-	@cd dalle ; TB_DALLE_SKIP_IMAGE=1 go test --count=1 ./... ; cd - 2>/dev/null
+	@TB_DALLE_SKIP_IMAGE=1 go test ./...
+	@cd dalle ; TB_DALLE_SKIP_IMAGE=1 go test ./... ; cd - 2>/dev/null
 
 race:
 	TB_DALLE_SKIP_IMAGE=1 go test -race ./...
