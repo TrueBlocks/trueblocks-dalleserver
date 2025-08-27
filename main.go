@@ -34,6 +34,8 @@ func main() {
 	mux.HandleFunc("/preview", app.handlePreview)
 	mux.Handle("/files/", http.StripPrefix("/files/", http.FileServer(http.Dir(dalle.OutputDir()))))
 
+	startStatusPrinter(0)
+
 	port := getPort()
 	srv := &http.Server{
 		Addr:              port,
