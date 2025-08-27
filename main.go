@@ -29,8 +29,8 @@ func main() {
 	mux.HandleFunc("/dalle/", app.handleDalleDress)
 	mux.HandleFunc("/series", app.handleSeries)
 	mux.HandleFunc("/series/", app.handleSeries)
-	mux.HandleFunc("/healthz", handleHealth)
-	mux.HandleFunc("/metrics", handleMetrics)
+	mux.HandleFunc("/healthz", app.handleHealth)
+	mux.HandleFunc("/metrics", app.handleMetrics)
 	mux.HandleFunc("/preview", app.handlePreview)
 	mux.Handle("/files/", http.StripPrefix("/files/", http.FileServer(http.Dir(dalle.OutputDir()))))
 
@@ -62,18 +62,6 @@ func main() {
 		app.Logf("Graceful shutdown failed: %v", err)
 		_ = srv.Close()
 	}
-}
-
-// handleHealth provides a simple health probe.
-func handleHealth(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	_, _ = w.Write([]byte(`{"status":"ok"}`))
-}
-
-// handleMetrics exposes very basic counters (placeholder).
-func handleMetrics(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain; version=0.0.4")
-	_, _ = w.Write([]byte("dalleserver_up 1\n"))
 }
 
 func getPort() string {
