@@ -84,16 +84,16 @@ func startStatusPrinter(interval time.Duration) {
 				logger.Info("")
 			}
 			for _, r := range rows {
-				logger.Info(fmt.Sprintf("%-*s  %-*s  %-*s  %*s  %-*s  %-*s  %-*s  %-*s",
-					w.series, r.series,
-					w.address, r.address,
-					w.phase, r.phase,
-					w.pct, r.pct,
-					w.eta, r.eta,
-					w.elapsed, r.elapsed,
-					w.cache, r.cache,
-					w.err, r.err,
-				))
+		       logger.Info(fmt.Sprintf("%-*s  %-*s  %-*s  %*s  %-*s  %-*s  %-*s  %-*s",
+			       w.phase, r.phase,
+			       w.address, r.address,
+			       w.series, r.series,
+			       w.pct, r.pct,
+			       w.eta, r.eta,
+			       w.elapsed, r.elapsed,
+			       w.cache, r.cache,
+			       w.err, r.err,
+		       ))
 			}
 		}
 	}
