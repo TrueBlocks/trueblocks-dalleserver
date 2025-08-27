@@ -2,8 +2,9 @@ all:
 	go build ./...
 
 serve:
-	$(MAKE) -j 12 all
-	go run .
+	@make test
+	@$(MAKE) -j 12 all
+	@go run .
 
 lint:
 	golangci-lint run ./...
