@@ -14,8 +14,6 @@ func TestMainRequestRespond(t *testing.T) {
 	isDebugging = true
 	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"empty"}})
 	app := NewApp()
-	app.StartLogging()
-	defer app.StopLogging()
 	series := "empty"
 	addr := "0xf503017d7baf7fbc0fff7492b751025c6a78179b"
 	req := Request{

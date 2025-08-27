@@ -14,8 +14,6 @@ import (
 func TestHandleDalleErrors(t *testing.T) {
 	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"empty"}})
 	app := NewApp()
-	app.StartLogging()
-	defer app.StopLogging()
 
 	cases := []struct {
 		name       string

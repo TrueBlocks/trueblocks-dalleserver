@@ -17,8 +17,6 @@ import (
 func TestSimulatedOpenAIFailure(t *testing.T) {
 	dalle.SetupTest(t, dalle.SetupTestOptions{Series: []string{"empty"}})
 	app := NewApp()
-	app.StartLogging()
-	defer app.StopLogging()
 
 	// Prepare injection
 	called := 0

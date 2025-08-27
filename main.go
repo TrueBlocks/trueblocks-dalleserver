@@ -11,13 +11,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/logger"
 	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
 )
 
 func main() {
 	app := NewApp()
-	app.StartLogging()
-	defer app.StopLogging()
 
 	// Fail fast if required OpenAI key missing (before starting server)
 	if os.Getenv("OPENAI_API_KEY") == "" {
@@ -48,20 +47,18 @@ func main() {
 
 	// Graceful shutdown
 	go func() {
-		app.Logf("Starting server on %s", port)
+		logger.InfoG(fmt.Sprintf("Starting server on %s", port))
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			app.Logf("Server error: %v", err)
+			logger.InfoR(fmt.Sprintf("Server error: %v", err))
 		}
 	}()
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	app.Logf("Shutdown signal received")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		app.Logf("Graceful shutdown failed: %v", err)
 		_ = srv.Close()
 	}
 }
