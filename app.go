@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -14,17 +13,6 @@ import (
 type App struct {
 	ValidSeries []string
 	Config      Config
-}
-
-// colorStripWriter removes ANSI escape sequences before writing (used for file logs).
-type colorStripWriter struct{ w io.Writer }
-
-// var ansiRegexp = regexp.MustCompile(`\x1b\[[0-9;]*m`)
-
-func (c colorStripWriter) Write(p []byte) (int, error) {
-	// clean := ansiRegexp.ReplaceAll(p, nil)
-	// return c.w.Write(clean)
-	return c.w.Write(p)
 }
 
 func NewApp() *App {
