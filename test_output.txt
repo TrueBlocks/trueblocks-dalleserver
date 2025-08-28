@@ -1,0 +1,179 @@
+ok  	github.com/TrueBlocks/trueblocks-dalleserver	(cached)
+INFO[27-08|20:42:32.902] dress.build.start addr 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+INFO[27-08|20:42:32.902] dress.build.generate addr 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+INFO[27-08|20:42:32.978] [32mdress.build.end addr 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef durMs 76 [0m
+INFO[27-08|20:42:32.978] dress.build.start addr 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+INFO[27-08|20:42:32.978] dress.build.cache_hit addr 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+INFO[27-08|20:42:32.978] dress.build.start addr short
+INFO[27-08|20:42:32.978] dress.build.generate addr short
+INFO[27-08|20:42:32.978] dress.build.start addr 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+INFO[27-08|20:42:32.978] dress.build.generate addr 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+INFO[27-08|20:42:33.018] [32mdress.build.end addr 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef durMs 39 [0m
+INFO[27-08|20:42:33.018] dress.build.start addr 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+INFO[27-08|20:42:33.018] dress.build.cache_hit addr 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+INFO[27-08|20:42:33.018] dress.build.start addr 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+INFO[27-08|20:42:33.018] dress.build.cache_hit addr 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+INFO[27-08|20:42:33.018] dress.build.start addr 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+INFO[27-08|20:42:33.018] dress.build.generate addr 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+INFO[27-08|20:42:33.074] [32mdress.build.end addr 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef durMs 55 [0m
+INFO[27-08|20:42:33.074] dress.build.start addr 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+INFO[27-08|20:42:33.074] dress.build.cache_hit addr 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+INFO[27-08|20:42:33.090] dress.build.start addr short
+INFO[27-08|20:42:33.090] dress.build.generate addr short
+INFO[27-08|20:42:33.096] db.load.series series empty
+INFO[27-08|20:42:33.097] no series found, creating a new file /var/folders/jv/sftv3vm17n7fq8dp80537xlm0000gn/T/TestReloadDatabases_Basic61752079/001/series/empty.json
+INFO[27-08|20:42:33.103] [32mdb.series.reload series empty [0m
+INFO[27-08|20:42:33.123] [32mdb.databases.reload count 15 [0m
+INFO[27-08|20:42:33.123] db.load.series series empty
+INFO[27-08|20:42:33.123] [32mdb.series.reload series empty [0m
+INFO[27-08|20:42:33.126] [32mdb.databases.reload count 1 [0m
+CURL 
+# LABEL
+curl -sS -X POST https://example.com \
+  -H 'Authorization: Bearer $OPENAI_API_KEY' \
+  -d '{
+  "a": "b"
+}'
+
+CURL 
+# LABEL
+curl -sS -X POST https://example.com \
+  -H 'Authorization: Bearer sk-live-abcdef' \
+  -d '{
+  "a": "b"
+}'
+
+CURL 
+# LABEL
+curl -sS -X POST https://example.com \
+  -H 'Authorization: Bearer $OPENAI_API_KEY' \
+  -d '{
+  "quote": "O'"'"'Reilly"
+}'
+
+INFO[27-08|20:42:33.127] [32mprompt.enhance.http durMs 0 status 200 [0m
+INFO[27-08|20:42:33.127] [31mprompt.enhance.empty_choices [0m
+INFO[27-08|20:42:33.128] [36m testfile [33m - RequestImage:start [0m
+INFO[27-08|20:42:33.128] [36m testfile [33m - improving the prompt... [0m
+INFO[27-08|20:42:33.128] [36m testfile [33m - skipped image generation (no OPENAI_API_KEY) [0m
+INFO[27-08|20:42:33.128] [36m testfile [33m - RequestImage:end 192µs [0m
+--- FAIL: TestLoggingImagePipeline (0.10s)
+    logging_test.go:91: missing token image.request.start in logs
+INFO[27-08|20:42:33.282] annotated.build.start series empty addr 0xf503017d7baf7fbc0fff7492b751025c6a78179b skipImage true
+INFO[27-08|20:42:33.282] db.load.series series empty
+INFO[27-08|20:42:33.282] [32mdb.series.reload series empty [0m
+INFO[27-08|20:42:33.285] [32mdb.databases.reload count 1 [0m
+INFO[27-08|20:42:33.285] db.load.series series empty
+INFO[27-08|20:42:33.285] dress.build.start addr 0xf503017d7baf7fbc0fff7492b751025c6a78179b
+INFO[27-08|20:42:33.285] dress.build.generate addr 0xf503017d7baf7fbc0fff7492b751025c6a78179b
+INFO[27-08|20:42:33.337] [32mdress.build.end addr 0xf503017d7baf7fbc0fff7492b751025c6a78179b durMs 51 [0m
+INFO[27-08|20:42:33.338] phase.transition series empty addr 0xf503017d7baf7fbc0fff7492b751025c6a78179b from setup to base_prompts
+INFO[27-08|20:42:33.338] annotated.build.skip_image series empty addr 0xf503017d7baf7fbc0fff7492b751025c6a78179b
+INFO[27-08|20:42:33.338] phase.skip series empty addr 0xf503017d7baf7fbc0fff7492b751025c6a78179b phase enhance_prompt
+INFO[27-08|20:42:33.338] phase.skip series empty addr 0xf503017d7baf7fbc0fff7492b751025c6a78179b phase image_prep
+INFO[27-08|20:42:33.338] phase.skip series empty addr 0xf503017d7baf7fbc0fff7492b751025c6a78179b phase image_wait
+INFO[27-08|20:42:33.338] phase.skip series empty addr 0xf503017d7baf7fbc0fff7492b751025c6a78179b phase image_download
+INFO[27-08|20:42:33.340] phase.transition series empty addr 0xf503017d7baf7fbc0fff7492b751025c6a78179b from base_prompts to annotate
+INFO[27-08|20:42:33.341] phase.transition series empty addr 0xf503017d7baf7fbc0fff7492b751025c6a78179b from annotate to completed
+INFO[27-08|20:42:33.342] [32mphase.complete series empty addr 0xf503017d7baf7fbc0fff7492b751025c6a78179b [0m
+INFO[27-08|20:42:33.342] [32mrun.summary series empty addr 0xf503017d7baf7fbc0fff7492b751025c6a78179b durMs 4 phases 8 cacheHit false error  downloadMode  [0m
+INFO[27-08|20:42:33.343] [32mannotated.build.end series empty addr 0xf503017d7baf7fbc0fff7492b751025c6a78179b durMs 61 [0m
+INFO[27-08|20:42:33.346] annotated.build.start series series1 addr 0x1111111111111111111111111111111111111111 skipImage false
+INFO[27-08|20:42:33.346] db.load.series series empty
+INFO[27-08|20:42:33.346] no series found, creating a new file /var/folders/jv/sftv3vm17n7fq8dp80537xlm0000gn/T/dalle-progress-cachehit636949497/series/empty.json
+INFO[27-08|20:42:33.356] [32mdb.series.reload series empty [0m
+INFO[27-08|20:42:33.360] [32mdb.databases.reload count 1 [0m
+INFO[27-08|20:42:33.360] db.load.series series series1
+INFO[27-08|20:42:33.360] dress.build.start addr 0x1111111111111111111111111111111111111111
+INFO[27-08|20:42:33.360] dress.build.generate addr 0x1111111111111111111111111111111111111111
+INFO[27-08|20:42:33.413] [32mdress.build.end addr 0x1111111111111111111111111111111111111111 durMs 52 [0m
+INFO[27-08|20:42:33.416] phase.transition series series1 addr 0x1111111111111111111111111111111111111111 from setup to base_prompts
+INFO[27-08|20:42:33.416] phase.transition series series1 addr 0x1111111111111111111111111111111111111111 from base_prompts to completed
+INFO[27-08|20:42:33.416] [32mphase.complete series series1 addr 0x1111111111111111111111111111111111111111 [0m
+INFO[27-08|20:42:33.416] [32mrun.summary series series1 addr 0x1111111111111111111111111111111111111111 durMs 3 phases 3 cacheHit true error  downloadMode  [0m
+INFO[27-08|20:42:33.421] annotated.build.start series srx addr 0x2222222222222222222222222222222222222222 skipImage false
+INFO[27-08|20:42:33.421] db.load.series series empty
+INFO[27-08|20:42:33.421] no series found, creating a new file /var/folders/jv/sftv3vm17n7fq8dp80537xlm0000gn/T/dalle-progress-fullrun2782201963/series/empty.json
+INFO[27-08|20:42:33.434] [32mdb.series.reload series empty [0m
+INFO[27-08|20:42:33.438] [32mdb.databases.reload count 1 [0m
+INFO[27-08|20:42:33.438] db.load.series series srx
+INFO[27-08|20:42:33.438] dress.build.start addr 0x2222222222222222222222222222222222222222
+INFO[27-08|20:42:33.438] dress.build.generate addr 0x2222222222222222222222222222222222222222
+INFO[27-08|20:42:33.494] [32mdress.build.end addr 0x2222222222222222222222222222222222222222 durMs 55 [0m
+INFO[27-08|20:42:33.495] phase.transition series srx addr 0x2222222222222222222222222222222222222222 from setup to base_prompts
+INFO[27-08|20:42:33.496] phase.transition series srx addr 0x2222222222222222222222222222222222222222 from base_prompts to enhance_prompt
+INFO[27-08|20:42:33.496] image.pipeline.start addr 0x2222222222222222222222222222222222222222
+INFO[27-08|20:42:33.496] dress.build.start addr 0x2222222222222222222222222222222222222222
+INFO[27-08|20:42:33.496] dress.build.cache_hit addr 0x2222222222222222222222222222222222222222
+INFO[27-08|20:42:33.496] prompt.enhance.start addr 0x2222222222222222222222222222222222222222
+INFO[27-08|20:42:33.496] dress.build.start addr 0x2222222222222222222222222222222222222222
+INFO[27-08|20:42:33.496] dress.build.cache_hit addr 0x2222222222222222222222222222222222222222
+INFO[27-08|20:42:33.496] dress.build.start addr 0x2222222222222222222222222222222222222222
+INFO[27-08|20:42:33.496] dress.build.cache_hit addr 0x2222222222222222222222222222222222222222
+INFO[27-08|20:42:33.496] [32mprompt.enhance.end addr 0x2222222222222222222222222222222222222222 durMs 0 [0m
+INFO[27-08|20:42:33.508] dress.build.start addr 0x2222222222222222222222222222222222222222
+INFO[27-08|20:42:33.508] dress.build.cache_hit addr 0x2222222222222222222222222222222222222222
+INFO[27-08|20:42:33.525] phase.transition series srx addr 0x2222222222222222222222222222222222222222 from enhance_prompt to image_prep
+INFO[27-08|20:42:33.525] [36m 0x2222222222222222222222222222222222222222 [33m - RequestImage:start [0m
+INFO[27-08|20:42:33.525] [36m 0x2222222222222222222222222222222222222222 [33m - improving the prompt... [0m
+INFO[27-08|20:42:33.525] [36m 0x2222222222222222222222222222222222222222 [33m - generating the image... [0m
+INFO[27-08|20:42:33.526] phase.transition series srx addr 0x2222222222222222222222222222222222222222 from image_prep to image_wait
+INFO[27-08|20:42:33.526] [36m 0x2222222222222222222222222222222222222222 [33m - POSTing image request [0m
+INFO[27-08|20:42:33.532] [36m 0x2222222222222222222222222222222222222222 [33m - image request responded in 5.474333ms [0m
+INFO[27-08|20:42:33.533] phase.transition series srx addr 0x2222222222222222222222222222222222222222 from image_wait to image_download
+INFO[27-08|20:42:33.533] [36m 0x2222222222222222222222222222222222222222 [33m - downloading image [0m
+INFO[27-08|20:42:33.535] phase.transition series srx addr 0x2222222222222222222222222222222222222222 from image_download to annotate
+INFO[27-08|20:42:33.535] [36m 0x2222222222222222222222222222222222222222 [32m - image saved as [37m/var/folders/jv/sftv3vm17n7fq8dp80537xlm0000gn/T/dalle-progress-fullrun2782201963/output/srx/annotated/0x2222222222222222222222222222222222222222.png [0m
+INFO[27-08|20:42:33.535] [36m 0x2222222222222222222222222222222222222222 [33m - RequestImage:end 10.582083ms [0m
+INFO[27-08|20:42:33.535] [32mimage.pipeline.end addr 0x2222222222222222222222222222222222222222 durMs 39 [0m
+INFO[27-08|20:42:33.536] phase.transition series srx addr 0x2222222222222222222222222222222222222222 from annotate to completed
+INFO[27-08|20:42:33.536] [32mphase.complete series srx addr 0x2222222222222222222222222222222222222222 [0m
+INFO[27-08|20:42:33.536] [32mrun.summary series srx addr 0x2222222222222222222222222222222222222222 durMs 42 phases 8 cacheHit false error  downloadMode  [0m
+INFO[27-08|20:42:33.537] [32mannotated.build.end series srx addr 0x2222222222222222222222222222222222222222 durMs 115 [0m
+INFO[27-08|20:42:33.540] annotated.build.start series arch addr 0x3333333333333333333333333333333333333333 skipImage false
+INFO[27-08|20:42:33.540] db.load.series series empty
+INFO[27-08|20:42:33.540] no series found, creating a new file /var/folders/jv/sftv3vm17n7fq8dp80537xlm0000gn/T/dalle-progress-archive2135100341/series/empty.json
+INFO[27-08|20:42:33.560] [32mdb.series.reload series empty [0m
+INFO[27-08|20:42:33.565] [32mdb.databases.reload count 1 [0m
+INFO[27-08|20:42:33.565] db.load.series series arch
+INFO[27-08|20:42:33.565] dress.build.start addr 0x3333333333333333333333333333333333333333
+INFO[27-08|20:42:33.566] dress.build.generate addr 0x3333333333333333333333333333333333333333
+INFO[27-08|20:42:33.611] [32mdress.build.end addr 0x3333333333333333333333333333333333333333 durMs 45 [0m
+INFO[27-08|20:42:33.612] phase.transition series arch addr 0x3333333333333333333333333333333333333333 from setup to base_prompts
+INFO[27-08|20:42:33.613] phase.transition series arch addr 0x3333333333333333333333333333333333333333 from base_prompts to enhance_prompt
+INFO[27-08|20:42:33.613] image.pipeline.start addr 0x3333333333333333333333333333333333333333
+INFO[27-08|20:42:33.613] dress.build.start addr 0x3333333333333333333333333333333333333333
+INFO[27-08|20:42:33.613] dress.build.cache_hit addr 0x3333333333333333333333333333333333333333
+INFO[27-08|20:42:33.613] prompt.enhance.start addr 0x3333333333333333333333333333333333333333
+INFO[27-08|20:42:33.613] dress.build.start addr 0x3333333333333333333333333333333333333333
+INFO[27-08|20:42:33.613] dress.build.cache_hit addr 0x3333333333333333333333333333333333333333
+INFO[27-08|20:42:33.613] dress.build.start addr 0x3333333333333333333333333333333333333333
+INFO[27-08|20:42:33.613] dress.build.cache_hit addr 0x3333333333333333333333333333333333333333
+INFO[27-08|20:42:33.613] [32mprompt.enhance.end addr 0x3333333333333333333333333333333333333333 durMs 0 [0m
+INFO[27-08|20:42:33.624] dress.build.start addr 0x3333333333333333333333333333333333333333
+INFO[27-08|20:42:33.624] dress.build.cache_hit addr 0x3333333333333333333333333333333333333333
+INFO[27-08|20:42:33.637] phase.transition series arch addr 0x3333333333333333333333333333333333333333 from enhance_prompt to image_prep
+INFO[27-08|20:42:33.637] [36m 0x3333333333333333333333333333333333333333 [33m - RequestImage:start [0m
+INFO[27-08|20:42:33.637] [36m 0x3333333333333333333333333333333333333333 [33m - improving the prompt... [0m
+INFO[27-08|20:42:33.637] [36m 0x3333333333333333333333333333333333333333 [33m - generating the image... [0m
+INFO[27-08|20:42:33.638] phase.transition series arch addr 0x3333333333333333333333333333333333333333 from image_prep to image_wait
+INFO[27-08|20:42:33.638] [36m 0x3333333333333333333333333333333333333333 [33m - POSTing image request [0m
+INFO[27-08|20:42:33.639] [36m 0x3333333333333333333333333333333333333333 [33m - image request responded in 933.125µs [0m
+INFO[27-08|20:42:33.641] phase.transition series arch addr 0x3333333333333333333333333333333333333333 from image_wait to image_download
+INFO[27-08|20:42:33.641] [36m 0x3333333333333333333333333333333333333333 [33m - downloading image [0m
+INFO[27-08|20:42:33.642] phase.transition series arch addr 0x3333333333333333333333333333333333333333 from image_download to annotate
+INFO[27-08|20:42:33.642] [36m 0x3333333333333333333333333333333333333333 [32m - image saved as [37m/var/folders/jv/sftv3vm17n7fq8dp80537xlm0000gn/T/dalle-progress-archive2135100341/output/arch/annotated/0x3333333333333333333333333333333333333333.png [0m
+INFO[27-08|20:42:33.642] [36m 0x3333333333333333333333333333333333333333 [33m - RequestImage:end 5.09075ms [0m
+INFO[27-08|20:42:33.642] [32mimage.pipeline.end addr 0x3333333333333333333333333333333333333333 durMs 29 [0m
+INFO[27-08|20:42:33.642] phase.transition series arch addr 0x3333333333333333333333333333333333333333 from annotate to completed
+INFO[27-08|20:42:33.643] [32mphase.complete series arch addr 0x3333333333333333333333333333333333333333 [0m
+INFO[27-08|20:42:33.643] [32mrun.summary series arch addr 0x3333333333333333333333333333333333333333 durMs 31 phases 8 cacheHit false error  downloadMode  [0m
+INFO[27-08|20:42:33.643] [32mannotated.build.end series arch addr 0x3333333333333333333333333333333333333333 durMs 103 [0m
+INFO[27-08|20:42:33.645] [32mprompt.enhance.http durMs 0 status 200 [0m
+INFO[27-08|20:42:33.645] [32mprompt.enhance.http durMs 0 status 200 [0m
+INFO[27-08|20:42:33.645] [32mprompt.enhance.http durMs 0 status 200 [0m
+INFO[27-08|20:42:33.645] [32mprompt.enhance.http durMs 0 status 200 [0m
+FAIL
+FAIL	github.com/TrueBlocks/trueblocks-dalle/v2	1.012s
+FAIL
+/Users/jrush/Development/trueblocks-dalleserver
