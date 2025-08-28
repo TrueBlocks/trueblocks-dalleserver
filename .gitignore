@@ -1,13 +1,16 @@
-addrs
-thing
-thing.1
+.env
+
 output
-series
-dalleserver
-trueblocks-dalleserver
+ai/*
+!ai/Rules.md
+!ai/Invoker.md
+
 .DS_Store
-ai
-server.log
+
+x
+shit*
+junk*
+
 *.exe
 *.exe~
 *.dll
@@ -17,11 +20,6 @@ server.log
 *.out
 go.work
 go.work.sum
-.env
-
-x
-shit*
-junk*
 
 .vscode/*
 !.vscode/settings.json
