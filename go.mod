@@ -13,7 +13,7 @@ require (
 require (
 	git.sr.ht/~sbinet/gg v0.6.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
-	github.com/TrueBlocks/trueblocks-sdk/v5 v5.3.1-0.20250819165026-4c1673f83965 // indirect
+	github.com/TrueBlocks/trueblocks-sdk/v5 v5.3.1-0.20250907182642-62fdfe423665 // indirect
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
 	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/bits-and-blooms/bitset v1.22.0 // indirect
