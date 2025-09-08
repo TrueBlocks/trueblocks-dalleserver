@@ -6,7 +6,7 @@ go 1.23.8
 replace github.com/TrueBlocks/trueblocks-dalle/v2 => ./dalle
 
 require (
-	github.com/TrueBlocks/trueblocks-core/src/apps/chifra v0.0.0-20250819215522-14adadd17718
+	github.com/TrueBlocks/trueblocks-core/src/apps/chifra v0.0.0-20250907182653-03634a2d9cce
 	github.com/TrueBlocks/trueblocks-dalle/v2 v2.0.0-00010101000000-000000000000
 )
 
