@@ -23,14 +23,22 @@ func main() {
 		fmt.Fprintln(os.Stderr, "WARNING: OPENAI_API_KEY not set; image generation will be skipped.")
 	}
 
+	// Initialize circuit breaker for OpenAI
+	circuitBreaker := NewCircuitBreaker(5, 30*time.Second)
+
+	// Initialize health checker with circuit breaker
+	GetHealthChecker().SetCircuitBreaker(circuitBreaker)
+
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", app.handleDefault)
-	mux.HandleFunc("/dalle/", app.handleDalleDress)
-	mux.HandleFunc("/series", app.handleSeries)
-	mux.HandleFunc("/series/", app.handleSeries)
-	mux.HandleFunc("/healthz", app.handleHealth)
-	mux.HandleFunc("/metrics", app.handleMetrics)
-	mux.HandleFunc("/preview", app.handlePreview)
+
+	// Apply middleware to all handlers
+	mux.HandleFunc("/", WrapWithMiddleware(app.handleDefault, circuitBreaker))
+	mux.HandleFunc("/dalle/", WrapWithMiddleware(app.handleDalleDress, circuitBreaker))
+	mux.HandleFunc("/series", WrapWithMiddleware(app.handleSeries, circuitBreaker))
+	mux.HandleFunc("/series/", WrapWithMiddleware(app.handleSeries, circuitBreaker))
+	mux.HandleFunc("/health", WrapWithMiddleware(app.handleHealth, circuitBreaker))
+	mux.HandleFunc("/metrics", WrapWithMiddleware(app.handleMetrics, circuitBreaker))
+	mux.HandleFunc("/preview", WrapWithMiddleware(app.handlePreview, circuitBreaker))
 	mux.Handle("/files/", http.StripPrefix("/files/", http.FileServer(http.Dir(dalle.OutputDir()))))
 
 	startStatusPrinter(0)

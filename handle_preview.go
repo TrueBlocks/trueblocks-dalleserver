@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 	"net/http"
 	"os"
@@ -125,6 +124,12 @@ func (a *App) handlePreview(w http.ResponseWriter, r *http.Request) {
 	}{Images: images, BySeries: bySeries, Series: keys, Now: time.Now()}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := previewTpl.Execute(w, data); err != nil {
-		http.Error(w, fmt.Sprintf("template error: %v", err), http.StatusInternalServerError)
+		requestID := GenerateRequestID()
+		apiErr := NewAPIError(
+			ErrorTemplateExecution,
+			"Template execution failed",
+			err.Error(),
+		).WithRequestID(requestID)
+		WriteErrorResponse(w, apiErr, http.StatusInternalServerError)
 	}
 }

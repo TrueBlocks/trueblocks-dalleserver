@@ -23,11 +23,12 @@ func NewApp() *App {
 }
 
 type Request struct {
-	series   string
-	address  string
-	generate bool
-	remove   bool
-	app      *App
+	series    string
+	address   string
+	generate  bool
+	remove    bool
+	app       *App
+	requestID string
 }
 
 func (r *Request) String() string {
@@ -35,39 +36,46 @@ func (r *Request) String() string {
   "series": "%s",
   "address": "%s",
   "generate": %t,
-  "remove": %t
-}`, r.series, r.address, r.generate, r.remove)
+  "remove": %t,
+  "request_id": "%s"
+}`, r.series, r.address, r.generate, r.remove, r.requestID)
 }
 
-func (a *App) parseRequest(r *http.Request) (Request, error) {
+func (a *App) parseRequest(r *http.Request) (Request, *APIError) {
+	requestID := GenerateRequestID()
 	path := strings.TrimPrefix(r.URL.Path, "/dalle/")
 
 	segments := strings.SplitN(path, "/", 2)
 	if len(segments) < 2 {
-		return Request{}, fmt.Errorf("invalid request: %s", r.URL.Path)
+		return Request{}, NewAPIError(
+			ErrorInvalidRequest,
+			"Invalid request path",
+			fmt.Sprintf("Path '%s' does not match expected format /dalle/{series}/{address}", r.URL.Path),
+		).WithRequestID(requestID)
 	}
 
 	series := strings.ToLower(segments[0])
 	if len(series) == 0 {
-		return Request{}, fmt.Errorf("series is required")
+		return Request{}, ErrorMissingRequiredParameter("series").WithRequestID(requestID)
 	}
 	if !dalle.IsValidSeries(series, a.ValidSeries) {
-		return Request{}, fmt.Errorf("invalid series")
+		return Request{}, ErrorInvalidSeriesName(series).WithRequestID(requestID)
 	}
 
 	address := strings.ToLower(segments[1])
 	if len(address) == 0 {
-		return Request{}, fmt.Errorf("address is required")
+		return Request{}, ErrorMissingRequiredParameter("address").WithRequestID(requestID)
 	}
 	if !base.IsValidAddress(address) {
-		return Request{}, fmt.Errorf("invalid address")
+		return Request{}, ErrorInvalidAddressFormat(address).WithRequestID(requestID)
 	}
 
 	return Request{
-		series:   series,
-		address:  address,
-		generate: r.URL.Query().Get("generate") == "1",
-		remove:   r.URL.Query().Has("remove"),
-		app:      a,
+		series:    series,
+		address:   address,
+		generate:  r.URL.Query().Get("generate") == "1",
+		remove:    r.URL.Query().Has("remove"),
+		app:       a,
+		requestID: requestID,
 	}, nil
 }
