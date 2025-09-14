@@ -7,8 +7,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
 )
 
 // Config holds runtime configuration.
@@ -51,8 +49,8 @@ func MustLoadConfig() Config {
 		}
 		cfg.LockTTL = ttl
 
-		// Set base data directory inside dalle lazily via provided flag (environment fallback inside package).
-		dalle.ConfigureDataDir(dataDirFlag)
+		// Set base data directory inside storage lazily via provided flag (environment fallback inside package).
+		// storage.ConfigureDataDir(dataDirFlag)
 
 		cachedConfig = cfg
 	})

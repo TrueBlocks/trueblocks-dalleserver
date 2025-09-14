@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
+	"github.com/TrueBlocks/trueblocks-dalle/v2/pkg/storage"
 )
 
 // imageMeta holds minimal data for gallery rendering.
@@ -72,7 +72,7 @@ function filterSeries(){const q=document.getElementById('filter').value.toLowerC
 </body></html>`))
 
 func (a *App) handlePreview(w http.ResponseWriter, r *http.Request) {
-	root := dalle.OutputDir()
+	root := storage.OutputDir()
 	var images []imageMeta
 	_ = filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
