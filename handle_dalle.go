@@ -12,6 +12,7 @@ import (
 	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/file"
 	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/logger"
 	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
+	"github.com/TrueBlocks/trueblocks-dalle/v2/pkg/progress"
 	"github.com/TrueBlocks/trueblocks-dalle/v2/pkg/storage"
 )
 
@@ -53,7 +54,7 @@ func (req *Request) Respond(w io.Writer, r *http.Request) {
 		rw.Header().Set("Content-Type", "application/json")
 	}
 
-	pr := dalle.GetProgress(req.series, req.address)
+	pr := progress.GetProgress(req.series, req.address)
 	if !isDebugging {
 		if pr != nil && !pr.Done && !req.generate {
 			logger.Info(fmt.Sprintf("[%s] generation already active; not spawning duplicate goroutine", req.requestID))

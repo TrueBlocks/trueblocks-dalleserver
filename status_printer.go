@@ -7,7 +7,7 @@ import (
 
 	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/colors"
 	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/logger"
-	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
+	"github.com/TrueBlocks/trueblocks-dalle/v2/pkg/progress"
 )
 
 // startStatusPrinter launches a background goroutine that periodically queries the
@@ -28,7 +28,7 @@ func startStatusPrinter(interval time.Duration) {
 				logger.Info(fmt.Sprintf("[status] panic recovered: %v", r))
 			}
 		}()
-		reports := dalle.ActiveProgressReports()
+		reports := progress.ActiveProgressReports()
 		sort.Slice(reports, func(i, j int) bool {
 			if reports[i].Series == reports[j].Series {
 				return reports[i].Address < reports[j].Address
