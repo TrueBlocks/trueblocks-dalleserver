@@ -116,6 +116,8 @@ func (c *OpenAIClient) enhancePromptAttempt(prompt, authorType, requestID string
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
+		GetMetricsCollector().RecordOpenAIRequest(false, false, requestID)
+		GetMetricsCollector().RecordError("OPENAI_ERROR", "openai_chat_completions", requestID)
 		return "", &OpenAIAPIError{
 			Message:    fmt.Sprintf("HTTP request failed: %v", err),
 			StatusCode: 0,
@@ -126,6 +128,8 @@ func (c *OpenAIClient) enhancePromptAttempt(prompt, authorType, requestID string
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
+		GetMetricsCollector().RecordOpenAIRequest(false, false, requestID)
+		GetMetricsCollector().RecordError("OPENAI_ERROR", "openai_chat_completions", requestID)
 		return "", &OpenAIAPIError{
 			Message:    fmt.Sprintf("read response body: %v", err),
 			StatusCode: resp.StatusCode,
@@ -143,7 +147,8 @@ func (c *OpenAIClient) enhancePromptAttempt(prompt, authorType, requestID string
 		if len(errorBody) > 512 {
 			errorBody = errorBody[:512] + "..."
 		}
-
+		GetMetricsCollector().RecordOpenAIRequest(false, resp.StatusCode == http.StatusGatewayTimeout, requestID)
+		GetMetricsCollector().RecordError("OPENAI_ERROR", "openai_chat_completions", requestID)
 		return "", &OpenAIAPIError{
 			Message:    fmt.Sprintf("OpenAI API error: %s", errorBody),
 			StatusCode: resp.StatusCode,
@@ -166,6 +171,8 @@ func (c *OpenAIClient) enhancePromptAttempt(prompt, authorType, requestID string
 
 	var response dalleResponse
 	if err := json.Unmarshal(body, &response); err != nil {
+		GetMetricsCollector().RecordOpenAIRequest(false, false, requestID)
+		GetMetricsCollector().RecordError("OPENAI_ERROR", "openai_chat_completions", requestID)
 		return "", &OpenAIAPIError{
 			Message:    fmt.Sprintf("parse response: %v", err),
 			StatusCode: resp.StatusCode,
@@ -174,6 +181,8 @@ func (c *OpenAIClient) enhancePromptAttempt(prompt, authorType, requestID string
 	}
 
 	if response.Error != nil {
+		GetMetricsCollector().RecordOpenAIRequest(false, false, requestID)
+		GetMetricsCollector().RecordError("OPENAI_ERROR", "openai_chat_completions", requestID)
 		return "", &OpenAIAPIError{
 			Message:    fmt.Sprintf("OpenAI API error: %s", response.Error.Message),
 			StatusCode: resp.StatusCode,
@@ -194,6 +203,7 @@ func (c *OpenAIClient) enhancePromptAttempt(prompt, authorType, requestID string
 
 	logger.InfoG(fmt.Sprintf("[%s] OpenAI enhancement successful", requestID),
 		"originalLen", len(prompt), "enhancedLen", len(content))
+	GetMetricsCollector().RecordOpenAIRequest(true, false, requestID)
 
 	return content, nil
 }

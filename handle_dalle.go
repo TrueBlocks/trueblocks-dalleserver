@@ -64,6 +64,8 @@ func (req *Request) Respond(w io.Writer, r *http.Request) {
 				start := time.Now()
 				if path, err := generateAnnotatedImage(series, addr, req.app.Config.SkipImage || os.Getenv("TB_DALLE_SKIP_IMAGE") == "1", req.app.Config.LockTTL); err != nil {
 					logger.InfoR(fmt.Sprintf("[%s] error generating image:", requestID), err)
+					// Record a generation error (background failure not tied to HTTP status)
+					GetMetricsCollector().RecordError("GENERATION_ERROR", "/dalle/", requestID)
 				} else {
 					if file.FileExists(path) {
 						logger.InfoG(fmt.Sprintf("[%s] generated image for %s/%s in %s", requestID, series, addr, time.Since(start)))

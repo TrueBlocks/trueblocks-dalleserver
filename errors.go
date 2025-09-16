@@ -77,6 +77,9 @@ func (e *APIError) Error() string {
 // WriteErrorResponse writes a structured error response to the HTTP response writer
 func WriteErrorResponse(w http.ResponseWriter, err *APIError, statusCode int) {
 	w.Header().Set("Content-Type", "application/json")
+	if wrapper, ok := w.(*ResponseWriterWrapper); ok {
+		wrapper.statusCode = statusCode
+	}
 	w.WriteHeader(statusCode)
 
 	response := APIResponse{
