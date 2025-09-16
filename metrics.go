@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -314,6 +315,19 @@ func (mc *MetricsCollector) PrometheusMetrics() string {
 		result += fmt.Sprintf("dalleserver_response_time_ms{quantile=\"max\"} %d\n", metrics.ResponseTimes.Max)
 		result += fmt.Sprintf("dalleserver_response_time_ms{quantile=\"0.95\"} %d\n", metrics.ResponseTimes.P95)
 		result += fmt.Sprintf("dalleserver_response_time_ms{quantile=\"0.99\"} %d\n", metrics.ResponseTimes.P99)
+	}
+
+	// Error breakdowns by code
+	for code, count := range metrics.ErrorsByCode {
+		// sanitize code for label value (very simple: replace quotes)
+		safeCode := strings.ReplaceAll(code, "\"", "")
+		result += fmt.Sprintf("dalleserver_error_code_total{code=\"%s\"} %d\n", safeCode, count)
+	}
+	// Error breakdowns by endpoint
+	for ep, count := range metrics.ErrorsByEndpoint {
+		// basic sanitation
+		safeEp := strings.ReplaceAll(ep, "\"", "")
+		result += fmt.Sprintf("dalleserver_error_endpoint_total{endpoint=\"%s\"} %d\n", safeEp, count)
 	}
 
 	// Always include the basic up metric

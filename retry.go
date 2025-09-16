@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"math"
 	"time"
+
+	"github.com/TrueBlocks/trueblocks-dalle/v2/pkg/prompt"
 )
 
 // RetryConfig defines configuration for retry operations
@@ -44,52 +46,6 @@ func (r *RetryableError) Error() string {
 
 func (r *RetryableError) Unwrap() error {
 	return r.Err
-}
-
-// IsRetryableHTTPStatus checks if an HTTP status code indicates a retryable error
-func IsRetryableHTTPStatus(statusCode int) bool {
-	switch statusCode {
-	case 408, 429, 500, 502, 503, 504: // Timeout, Rate limit, Server errors
-		return true
-	case 400, 401, 403, 404: // Client errors - not retryable
-		return false
-	default:
-		return statusCode >= 500 // Default: retry server errors
-	}
-}
-
-// IsOpenAIRetryableError determines if an error from OpenAI should be retried
-func IsOpenAIRetryableError(err error, statusCode int) bool {
-	if err == nil {
-		return false
-	}
-
-	// Network errors are generally retryable
-	errorStr := err.Error()
-	if contains(errorStr, "timeout") || contains(errorStr, "connection") ||
-		contains(errorStr, "network") || contains(errorStr, "EOF") {
-		return true
-	}
-
-	// HTTP status-based retry logic
-	return IsRetryableHTTPStatus(statusCode)
-}
-
-// contains is a helper function for string checking
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr ||
-		(len(s) > len(substr) &&
-			(s[:len(substr)] == substr || s[len(s)-len(substr):] == substr ||
-				indexOf(s, substr) >= 0)))
-}
-
-func indexOf(s, substr string) int {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return i
-		}
-	}
-	return -1
 }
 
 // RetryWithBackoff executes a function with exponential backoff retry logic
@@ -163,7 +119,7 @@ func RetryableHTTPOperation(config RetryConfig, requestID string, operation func
 	return RetryWithBackoff(config, func() error {
 		statusCode, err := operation()
 		if err != nil {
-			if IsOpenAIRetryableError(err, statusCode) {
+			if prompt.IsOpenAIRetryableError(err, statusCode) {
 				return fmt.Errorf("[%s] retryable error (status %d): %w", requestID, statusCode, err)
 			}
 			return fmt.Errorf("[%s] non-retryable error (status %d): %w", requestID, statusCode, err)

@@ -341,6 +341,7 @@ func TestPrometheusMetrics(t *testing.T) {
 
 	// Record some test data
 	collector.RecordError("TEST_ERROR", "test_endpoint", "test-123")
+	collector.RecordError("ANOTHER_ERROR", "other_endpoint", "test-456")
 	collector.RecordRetry("test_operation", "test-456")
 	collector.RecordResponseTime(200, "test-789")
 
@@ -348,9 +349,13 @@ func TestPrometheusMetrics(t *testing.T) {
 
 	// Check for expected metrics
 	expectedMetrics := []string{
-		"dalleserver_errors_total 1",
+		"dalleserver_errors_total 2",
 		"dalleserver_retries_total 1",
 		"dalleserver_up 1",
+		"dalleserver_error_code_total{code=\"TEST_ERROR\"} 1",
+		"dalleserver_error_code_total{code=\"ANOTHER_ERROR\"} 1",
+		"dalleserver_error_endpoint_total{endpoint=\"test_endpoint\"} 1",
+		"dalleserver_error_endpoint_total{endpoint=\"other_endpoint\"} 1",
 	}
 
 	for _, expected := range expectedMetrics {
