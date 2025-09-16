@@ -1,38 +1,48 @@
 # Testing & Benchmarks
 
-## Tests
-Key tests in this repository:
+The test suite exercises request parsing, error shaping, locking behavior, progress handling, and failure resilience without requiring real OpenAI calls.
 
-- `request_test.go`
-  - `TestParseRequest` validates request parsing, error conditions (missing series, invalid address, etc.).
-  - `TestListSeries` ensures at least one series is discovered.
-- `failure_test.go`
-  - Simulates a generation failure by injecting a failing `generateAnnotatedImage` function and ensures handler returns 200 with the standard status message.
+## Modes
+Image generation is skipped automatically when `OPENAI_API_KEY` is absent (or `TB_DALLE_SKIP_IMAGE=1`), enabling fast deterministic tests. The library still produces progress objects with simulated phases.
 
-Run tests (skip real image generation):
+## Key Tests (Representative)
+| File | Focus |
+|------|-------|
+| `request_test.go` | Path parsing, validation errors, query flags (`generate`, `remove`). |
+| `failure_test.go` | Injected failure through `generateAnnotatedImage` stub ensures graceful 200 + error recording. |
+| `health*.go` tests (if present) | Health component aggregation (filesystem, circuit breaker). |
+| `metrics` related tests | Ensure counters increment on synthetic errors / retries. |
+
+## Running
 ```bash
 make test
 ```
-Internally sets `DALLESERVER_SKIP_IMAGE=1`.
 
-## Race Detector
+Race detector:
 ```bash
 make race
 ```
 
 ## Benchmarks
-Benchmarks (prompt/image generation path) can be run with:
+Benchmark targets measure prompt + orchestration overhead (image path still skipped unless a key is supplied). Use:
 ```bash
 make bench
 ```
-or a focused target:
+Focused benchmark (see `makefile`):
 ```bash
 make benchmark
 ```
 
-### Baseline Capture
-Create timestamped JSON benchmark artifacts:
+Baselines capture JSON artifacts for regression tracking:
 ```bash
 make bench-baseline
 ```
-Outputs to `benchmarks/<timestamp>.json` and updates `benchmarks/latest.json`.
+Artifacts stored under `benchmarks/` with timestamped filenames; latest symlink / file pointer updated for easy diffing.
+
+## Adding New Tests
+* Favor table-driven tests for handlers (inputs: path + query, expected HTTP status + JSON code/message fields).
+* When stubbing generation, overwrite `generateAnnotatedImage` with a closure returning a temp file path or error.
+* For metrics assertions, snapshot counters before and after the action; assert monotonic increases.
+
+## Flakiness Guidance
+Avoid time-based sleeps for progress; directly call progress retrieval functions from the library after triggering a generation in tests. If unavoidable, keep sleeps short (<50ms) and document the rationale.

@@ -1,84 +1,51 @@
-# Progress & Metrics
+# Progress & Polling Contract
 
-The `/dalle/<series>/<address>` endpoint now returns structured JSON snapshots during generation instead of a plain status line. Each snapshot embeds the live `DalleDress` object and a timeline of canonical phases:
+The server exposes *progress* transparently by forwarding the library’s snapshot for an in‑flight generation. This chapter focuses on how clients should consume it rather than restating the library schema.
+
+## Lifecycle Phases (High Level)
+Typical sequence (library defined):
 
 ```
 setup → base_prompts → enhance_prompt → image_prep → image_wait → image_download → annotate → completed
 ```
 
-## Snapshot Schema (example)
-
-```json
-{
-  "series": "simple",
-  "address": "0xabc...",
-  "currentPhase": "image_wait",
-  "startedNs": 1730000000000000000,
-  "percent": 37.2,
-  "etaSeconds": 12.4,
-  "done": false,
-  "error": "",
-  "cacheHit": false,
-  "phases": [
-    {"name":"setup","startedNs":1730000000000000000,"endedNs":1730000001000000000,"skipped":false,"error":""},
-    {"name":"base_prompts","startedNs":1730000001000000000,"endedNs":1730000002000000000,"skipped":false,"error":""},
-    {"name":"enhance_prompt","startedNs":1730000002000000000,"endedNs":1730000003000000000,"skipped":true,"error":""},
-    {"name":"image_prep","startedNs":1730000003000000000,"endedNs":0,"skipped":false,"error":""}
-  ],
-  "dalleDress": { /* extended fields; never omitted */ },
-  "phaseAverages": { "image_wait": 2500000000 }
-}
-```
-
-### Field Notes
-- All top-level keys are always present (no `omitempty`). Empty slices are `[]` not `null`.
-- `percent` and `etaSeconds` are computed from exponential moving averages (EMA, alpha=0.2) of prior successful, non-skipped runs.
-- During a phase, elapsed time is capped at its average when computing percent to avoid overshoot.
-- `cacheHit=true` denotes the annotated image already existed; such runs do not update EMAs or `generationRuns`.
+Phases may be marked `skipped` (e.g. enhancement when running in skip mode).
 
 ## Polling Pattern
-Perform an initial request with `?generate=1` (if generation is desired) and poll the same URL until `done=true`.
+1. Kick off (or re-use) generation:
+   ```
+   GET /dalle/<series>/<address>?generate=1
+   ```
+2. Poll without changing parameters (optionally retain `?generate=1`; lock prevents duplicate work) once per second until `done=true`.
+3. When `done=true` and no `error`, re-request **without** `generate` to stream the final PNG directly.
 
-Example (bash/fish):
-```bash
-while true; sleep 1; curl -s http://localhost:8080/dalle/simple/0x....?generate=1 | jq '.percent, .currentPhase, .done' ; end
+Fish loop example:
+```fish
+while true
+    curl -s "http://localhost:8080/dalle/simple/<addr>?generate=1" | jq '.percent, .current, .done'
+    sleep 1
+end
 ```
 
-## Metrics Persistence
-Global rolling stats persist to:
-```
-metrics/progress_phase_stats.json
-```
-Schema (version `v1`):
-```json
-{
-  "version": "v1",
-  "phaseAverages": {
-    "image_wait": {"count": 4, "avgNs": 2100000000}
-  },
-  "generationRuns": 12,
-  "cacheHits": 5
-}
-```
-Only successful, non-skipped, non-cache-hit phase durations feed the EMA. Cache hits increment `cacheHits` only.
+## Percent & ETA
+`percent` and `etaSeconds` reflect exponential moving averages (EMA) tracked across prior successful runs (cache hits excluded). Expect more accuracy as the system observes more generations.
 
-## Testing Helpers
-Inside the `dalle` module:
-- `GetProgress(series,address)` – retrieve a snapshot (deletes it once `done=true`).
-- `ResetMetricsForTest()` – clear in-memory and on-disk metrics.
-- `ForceMetricsSave()` – flush current metrics to disk.
+## Cache Hits
+If the annotated PNG already exists before generation starts: snapshot returns quickly with `cacheHit=true`, `done=true`, minimal or empty phase timings.
 
-## Error Handling
-If a phase fails, the run transitions to `completed` with `error` populated; failed phase duration is excluded from averages.
+## Error Semantics
+Progress snapshot may include a non-empty `error` while `done=true`; client should surface the message and avoid retry loops unless user refires manually (e.g. after clearing causes like rate limiting). HTTP status still 200 in this case—polling contract relies on payload state not transport errors.
 
-## Concurrency & Integrity
-A single `ProgressManager` serializes updates per `(series,address)`. The live `DalleDress` pointer is reused—treat it as read-only when consumed in handlers or tests.
+## Stability & Forward Compatibility
+The progress object is additive: new fields may appear; existing names are stable. Clients should ignore unknown fields.
 
-## Cache Hit Short-Circuit
-If `output/<series>/annotated/<address>.png` exists before generation begins, a synthetic completed snapshot is emitted immediately (if no active run), flagged `cacheHit=true`.
+## Where to Find Field Details
+For a full enumeration of snapshot and `DalleDress` fields, consult the `trueblocks-dalle` book (progress section). This server layer intentionally avoids duplicating that documentation to prevent drift.
 
-## Future Enhancements (Ideas)
-- Optional run archive (disabled currently) writing each completed snapshot to disk.
-- Rolling p95 / p99 latency tracking alongside EMA.
-- WebSocket push for progress (avoiding polling).
-- Percent smoothing at phase boundaries to avoid visual jumps.
+## Observability Coupling
+Response time metrics collected in middleware are independent of progress timing; phase averages feed only the progress percent/ETA calculation inside the library.
+
+## Future Extensions (Server-Level)
+* Optional WebSocket push (reduces polling overhead)
+* Soft cancellation endpoint (e.g. `DELETE /dalle/<series>/<address>`)
+* Streaming Server-Sent Events wrapper around snapshot diffs
