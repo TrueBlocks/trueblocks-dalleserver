@@ -13,20 +13,26 @@ import (
 // TestComputeDataDirPrecedence verifies flag > env > default precedence using helper.
 func TestComputeDataDirPrecedence(t *testing.T) {
 	// env only precedence
-	os.Setenv("TB_DALLE_DATA_DIR", "/tmp/dalleserver-env-only")
+	if err := os.Setenv("TB_DALLE_DATA_DIR", "/tmp/dalleserver-env-only"); err != nil {
+		t.Fatal(err)
+	}
 	storage.TestOnlyResetDataDir("") // reset singleton
 	if got := storage.DataDir(); got != "/tmp/dalleserver-env-only" {
 		t.Fatalf("expected env path, got %s", got)
 	}
 
 	// flag overrides env on first init
-	os.Setenv("TB_DALLE_DATA_DIR", "/tmp/dalleserver-env")
+	if err := os.Setenv("TB_DALLE_DATA_DIR", "/tmp/dalleserver-env"); err != nil {
+		t.Fatal(err)
+	}
 	storage.TestOnlyResetDataDir("/tmp/dalleserver-flag")
 	if got := storage.DataDir(); got != "/tmp/dalleserver-flag" { // flag wins
 		t.Fatalf("expected flag path, got %s", got)
 	}
 	// clean
-	os.Unsetenv("TB_DALLE_DATA_DIR")
+	if err := os.Unsetenv("TB_DALLE_DATA_DIR"); err != nil {
+		t.Fatal(err)
+	}
 }
 
 // TestEnsureWritableCreates ensures directory creation.
@@ -35,7 +41,11 @@ func TestEnsureWritableCreates(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(tmp)
+	defer func() {
+		if err := os.RemoveAll(tmp); err != nil {
+			t.Logf("Failed to clean up temp dir: %v", err)
+		}
+	}()
 	path := filepath.Join(tmp, "sub", "dir")
 	if err := storage.EnsureWritable(path); err != nil {
 		t.Fatalf("EnsureWritable failed: %v", err)
@@ -54,7 +64,11 @@ func TestEnsureWritableFails(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(tmp)
+	defer func() {
+		if err := os.RemoveAll(tmp); err != nil {
+			t.Logf("Failed to clean up temp dir: %v", err)
+		}
+	}()
 	deny := filepath.Join(tmp, "deny")
 	if err := os.MkdirAll(deny, 0o500); err != nil { // execute-only to simulate non-writable parent
 		t.Fatal(err)

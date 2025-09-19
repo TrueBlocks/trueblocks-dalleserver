@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -10,8 +9,14 @@ import (
 )
 
 func (a *App) handleSeries(w http.ResponseWriter, r *http.Request) {
-	logger.Info(fmt.Sprintf("Received request: %s %s", r.Method, r.URL.Path))
+	requestID := GenerateRequestID()
+	logger.Info(fmt.Sprintf("[%s] Received request: %s %s", requestID, r.Method, r.URL.Path))
+
 	seriesList := dalle.ListSeries()
-	bytes, _ := json.MarshalIndent(seriesList, "", "  ")
-	fmt.Fprintln(w, "Available series: ", string(bytes))
+	data := map[string]interface{}{
+		"series": seriesList,
+		"count":  len(seriesList),
+	}
+
+	WriteSuccessResponse(w, data, requestID)
 }

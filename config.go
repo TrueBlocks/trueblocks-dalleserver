@@ -16,10 +16,8 @@ type Config struct {
 	LockTTL   time.Duration
 }
 
-var (
-	loadConfigOnce sync.Once
-	cachedConfig   Config
-)
+var loadConfigOnce sync.Once
+var cachedConfig Config
 
 // MustLoadConfig collects configuration from flags and environment.
 func MustLoadConfig() Config {
@@ -51,8 +49,8 @@ func MustLoadConfig() Config {
 		}
 		cfg.LockTTL = ttl
 
-		// Set base data directory inside dalle lazily via provided flag (environment fallback inside package).
-		// dalle.ConfigureDataDir(dataDirFlag)
+		// Set base data directory inside storage lazily via provided flag (environment fallback inside package).
+		// storage.ConfigureDataDir(dataDirFlag)
 
 		cachedConfig = cfg
 	})
@@ -66,7 +64,12 @@ func loadDotEnv() {
 	if err != nil {
 		return
 	}
-	defer f.Close()
+	defer func() {
+		if err := f.Close(); err != nil {
+			// Log error or handle as appropriate for your application
+			_ = err
+		}
+	}()
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())

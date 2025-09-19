@@ -1,78 +1,99 @@
 # Usage & Endpoints
 
-## Root
-```
-/
-```
-Lists available endpoints:
-- `/series` (and `/series/`)
-- `/dalle/<series>/<address>?[generate|remove]`
-- `/preview`
-- `/healthz`
-- `/metrics`
+All JSON responses include `success` and a correlation `request_id` (8-char UUID prefix).
 
-## List Series
+## Root (`/`)
+Plain text enumeration of primary endpoints. Not intended for automation.
+
+## Series Listing (`/series`)
+
 ```
 GET /series
 ```
-Returns: `Available series: [ ... ]` as a JSON array (pretty-printed inside the line).
 
-Implementation: `handleSeries` calls `dalle.ListSeries("output")` and prints the list.
+Example:
 
-## Generate or Fetch Image
-```
-GET /dalle/<series>/<address>
-GET /dalle/<series>/<address>?generate=1
-GET /dalle/<series>/<address>?remove=1
-```
-- Without query flags and if the annotated PNG exists, the image is served.
-- `?generate` triggers asynchronous generation (returns immediately with a status line).
-- `?remove` deletes the existing annotated image if present.
+```json
+{
+	"success": true,
+	"data": {"series":["simple"], "count":1},
+	## Image Generation & Progress (`/dalle/<series>/<address>`)
 
-Response when (re)generation starts:
-```
-Your image will be ready shortly
-```
+	Forms:
 
-If removal succeeds:
-```
-Image removed
-```
-If removal requested but file absent:
-```
-Image not found
-```
+	```
+	GET /dalle/<series>/<address>
+	GET /dalle/<series>/<address>?generate=1
+	GET /dalle/<series>/<address>?remove=1
+	```
 
-### Address Validation
-- Series must be one returned by `/series` (validated in `parseRequest`).
-- Address must be a valid Ethereum address (EIP-55 checksum normalization applied).
+	| Condition | Plain GET | `?generate=1` | `?remove=1` |
+	|-----------|-----------|---------------|-------------|
+	| Annotated PNG exists | Streams PNG | Returns progress (cacheHit true) | Deletes PNG (text confirmation) |
+	| PNG missing; idle | `{}` (no spawn) | Spawns generation goroutine; returns early progress or `{}` | (No-op) |
+	| PNG missing; active generation | Progress JSON | Same progress (lock prevents duplicate) | (No-op) |
 
-### Concurrency
-Generation is launched in a goroutine unless `isDebugging` is set (then synchronous). Progress is logged; no streaming output is provided.
+	Validation errors → 400 with codes: `INVALID_SERIES`, `INVALID_ADDRESS`, `MISSING_PARAMETER`.
 
-## Preview Gallery
-```
-GET /preview
-```
-Renders an HTML page grouping annotated images by series with a client-side filter box. Images are displayed square using a CSS aspect-ratio wrapper. Timestamps (mod time) are shown under each address.
+	The progress JSON (poll until `done=true`) is produced by the library; server only adds `request_id`.
 
-## Static Files
-```
-GET /files/<path under output/>
-```
-Serves raw files from the `output/` tree (e.g. annotated images).
+	### Locking & Concurrency
+	Per-key (series,address) lock with TTL (`--lock-ttl`) coalesces concurrent generation requests. Duplicate triggers only observe progress.
 
-## Health
-```
-GET /healthz
-```
-Returns JSON: `{"status":"ok"}`
+	### Removal
+	Only the annotated PNG is removed; prompts persist.
 
-## Metrics
-```
+	## Preview Gallery (`/preview`)
+	HTML template enumerating `<data>/output/<series>/annotated/*.png` grouped by series, newest first, client-side filter input.
+
+	## Static Files (`/files/`)
+	Serve any file under the output directory (read-only). Example: `/files/simple/annotated/0xabc...png`.
+
+	## Health (`/health`)
+
+	Modes via `check` query parameter:
+
+	| Mode | URL | Meaning | Codes |
+	|------|-----|---------|-------|
+	| Full | `/health` | Composite status + components (filesystem, openai, memory, disk_space). | 200 / 503 |
+	| Liveness | `/health?check=liveness` | Process responsive. | 200 |
+	| Readiness | `/health?check=readiness` | Ready unless overall unhealthy. | 200 / 503 |
+
+	OpenAI status reflects circuit breaker state (CLOSED→healthy, HALF_OPEN→degraded, OPEN→unhealthy).
+
+	## Metrics (`/metrics`)
+
+	| Request | Format | Purpose |
+	|---------|--------|---------|
+	| `/metrics` | Prometheus text | Counters, circuit breaker state gauges, response time quantiles, error breakdowns. |
+	| `/metrics?format=json` | JSON | Structured snapshot (same underlying data). |
+
+	Sample (abridged):
+
+	```
+	# Request ID: deadbeef
 GET /metrics
 ```
 Returns a placeholder Prometheus-style line:
 ```
+	```
+
+	## Error Shape
+
+	```json
+	{
+		"success": false,
+		"error": {"code":"INVALID_SERIES","message":"Invalid series name","details":"Series 'foo' not found","timestamp":1730000000,"request_id":"deadbeef"},
+		"request_id": "deadbeef"
+	}
+	```
+
+	Generation failures surface inside progress JSON (`error` field) with HTTP 200 to maintain polling flow.
+
+	## Auth & CORS
+	Not implemented. Apply upstream (reverse proxy / gateway) if needed.
+
+	## Versioning
+	No version prefix; additive changes preferred. Breaking changes should use new endpoints.
 dalleserver_up 1
 ```
