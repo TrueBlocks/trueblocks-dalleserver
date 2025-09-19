@@ -2,12 +2,9 @@ module github.com/TrueBlocks/trueblocks-dalleserver
 
 go 1.23.8
 
-// Use local submodule for active development of trueblocks-dalle
-replace github.com/TrueBlocks/trueblocks-dalle/v2 => ./dalle
-
 require (
 	github.com/TrueBlocks/trueblocks-core/src/apps/chifra v0.0.0-20250907182653-03634a2d9cce
-	github.com/TrueBlocks/trueblocks-dalle/v2 v2.0.0-00010101000000-000000000000
+	github.com/TrueBlocks/trueblocks-dalle/v2 v2.0.0-20250916045324-1c57f89ffee4
 )
 
 require (

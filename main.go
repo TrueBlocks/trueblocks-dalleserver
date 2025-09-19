@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/logger"
-	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
+	"github.com/TrueBlocks/trueblocks-dalle/v2/pkg/storage"
 )
 
 func main() {
@@ -31,7 +31,7 @@ func main() {
 	mux.HandleFunc("/healthz", app.handleHealth)
 	mux.HandleFunc("/metrics", app.handleMetrics)
 	mux.HandleFunc("/preview", app.handlePreview)
-	mux.Handle("/files/", http.StripPrefix("/files/", http.FileServer(http.Dir(dalle.OutputDir()))))
+	mux.Handle("/files/", http.StripPrefix("/files/", http.FileServer(http.Dir(storage.OutputDir()))))
 
 	startStatusPrinter(0)
 

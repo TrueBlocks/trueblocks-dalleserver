@@ -8,6 +8,7 @@ import (
 
 	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/base"
 	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
+	"github.com/TrueBlocks/trueblocks-dalle/v2/pkg/storage"
 )
 
 type App struct {
@@ -17,7 +18,7 @@ type App struct {
 
 func NewApp() *App {
 	app := App{Config: MustLoadConfig()}
-	_ = os.MkdirAll(dalle.OutputDir(), 0o750)
+	_ = os.MkdirAll(storage.OutputDir(), 0o750)
 	app.ValidSeries = dalle.ListSeries()
 	return &app
 }

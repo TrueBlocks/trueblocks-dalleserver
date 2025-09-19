@@ -12,6 +12,8 @@ import (
 	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/file"
 	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/logger"
 	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
+	"github.com/TrueBlocks/trueblocks-dalle/v2/pkg/progress"
+	"github.com/TrueBlocks/trueblocks-dalle/v2/pkg/storage"
 )
 
 var isDebugging = false
@@ -30,7 +32,7 @@ func (a *App) handleDalleDress(w http.ResponseWriter, r *http.Request) {
 }
 
 func (req *Request) Respond(w io.Writer, r *http.Request) {
-	filePath := filepath.Join(dalle.OutputDir(), req.series, "annotated", req.address+".png")
+	filePath := filepath.Join(storage.OutputDir(), req.series, "annotated", req.address+".png")
 	exists := file.FileExists(filePath)
 	if exists && req.remove {
 		_ = os.Remove(filePath)
@@ -42,7 +44,7 @@ func (req *Request) Respond(w io.Writer, r *http.Request) {
 		dalle.Clean(req.series, req.address)
 	} else if exists {
 		if rw, ok := w.(http.ResponseWriter); ok {
-			filePath := filepath.Join(dalle.OutputDir(), req.series, "annotated", req.address+".png")
+			filePath := filepath.Join(storage.OutputDir(), req.series, "annotated", req.address+".png")
 			http.ServeFile(rw, r, filePath)
 			return
 		}
@@ -52,7 +54,7 @@ func (req *Request) Respond(w io.Writer, r *http.Request) {
 		rw.Header().Set("Content-Type", "application/json")
 	}
 
-	pr := dalle.GetProgress(req.series, req.address)
+	pr := progress.GetProgress(req.series, req.address)
 	if !isDebugging {
 		if pr != nil && !pr.Done && !req.generate {
 			logger.Info("generation already active; not spawning duplicate goroutine")

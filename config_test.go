@@ -7,23 +7,22 @@ import (
 	"runtime"
 	"testing"
 
-	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
+	"github.com/TrueBlocks/trueblocks-dalle/v2/pkg/storage"
 )
 
 // TestComputeDataDirPrecedence verifies flag > env > default precedence using helper.
 func TestComputeDataDirPrecedence(t *testing.T) {
 	// env only precedence
 	os.Setenv("TB_DALLE_DATA_DIR", "/tmp/dalleserver-env-only")
-	dalle.TestOnlyResetDataDir() // reset singleton
-	if got := dalle.DataDir(); got != "/tmp/dalleserver-env-only" {
+	storage.TestOnlyResetDataDir("") // reset singleton
+	if got := storage.DataDir(); got != "/tmp/dalleserver-env-only" {
 		t.Fatalf("expected env path, got %s", got)
 	}
 
 	// flag overrides env on first init
 	os.Setenv("TB_DALLE_DATA_DIR", "/tmp/dalleserver-env")
-	dalle.TestOnlyResetDataDir()
-	dalle.ConfigureDataDir("/tmp/dalleserver-flag")
-	if got := dalle.DataDir(); got != "/tmp/dalleserver-flag" { // flag wins
+	storage.TestOnlyResetDataDir("/tmp/dalleserver-flag")
+	if got := storage.DataDir(); got != "/tmp/dalleserver-flag" { // flag wins
 		t.Fatalf("expected flag path, got %s", got)
 	}
 	// clean
@@ -38,7 +37,7 @@ func TestEnsureWritableCreates(t *testing.T) {
 	}
 	defer os.RemoveAll(tmp)
 	path := filepath.Join(tmp, "sub", "dir")
-	if err := dalle.EnsureWritable(path); err != nil {
+	if err := storage.EnsureWritable(path); err != nil {
 		t.Fatalf("EnsureWritable failed: %v", err)
 	}
 	if _, err := os.Stat(path); err != nil {
@@ -65,7 +64,7 @@ func TestEnsureWritableFails(t *testing.T) {
 	if err := os.Chmod(deny, 0o500); err != nil { // keep non-writable mode
 		t.Fatal(err)
 	}
-	if err := dalle.EnsureWritable(child); err == nil {
+	if err := storage.EnsureWritable(child); err == nil {
 		// On some systems root may still allow due to user ownership; best-effort check
 		if fi, statErr := os.Stat(child); statErr == nil && fi.IsDir() {
 			// Can't reliably fail; skip to avoid flake
