@@ -37,7 +37,10 @@ func (req *Request) Respond(w io.Writer, r *http.Request) {
 	exists := file.FileExists(filePath)
 	if exists && req.remove {
 		_ = os.Remove(filePath)
-		fmt.Fprintln(w, "image removed", filePath)
+		if _, err := fmt.Fprintln(w, "image removed", filePath); err != nil {
+			// Log error or handle as appropriate for your application
+			_ = err
+		}
 		return
 	}
 
@@ -94,7 +97,10 @@ func (req *Request) Respond(w io.Writer, r *http.Request) {
 		if rw, ok := w.(http.ResponseWriter); ok {
 			WriteSuccessResponse(rw, map[string]interface{}{}, req.requestID)
 		} else {
-			fmt.Fprintln(w, "{}")
+			if _, err := fmt.Fprintln(w, "{}"); err != nil {
+				// Log error or handle as appropriate for your application
+				_ = err
+			}
 		}
 		return
 	}

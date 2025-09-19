@@ -23,7 +23,7 @@ func (app *App) handleMetrics(w http.ResponseWriter, r *http.Request) {
 		prometheusMetrics := GetMetricsCollector().PrometheusMetrics()
 
 		// Add request ID as comment
-		_, _ = w.Write([]byte(fmt.Sprintf("# Request ID: %s\n", requestID)))
+		_, _ = fmt.Fprintf(w, "# Request ID: %s\n", requestID)
 		_, _ = w.Write([]byte(prometheusMetrics))
 	}
 

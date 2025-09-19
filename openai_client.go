@@ -125,7 +125,12 @@ func (c *OpenAIClient) enhancePromptAttempt(prmt, authorType, requestID string) 
 			RequestID:  requestID,
 		}
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			// Log error or handle as appropriate for your application
+			_ = err
+		}
+	}()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

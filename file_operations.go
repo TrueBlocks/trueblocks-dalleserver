@@ -189,7 +189,12 @@ func (rfo *RobustFileOperations) ReadFile(filePath, requestID string) ([]byte, e
 				RequestID: requestID,
 			}
 		}
-		defer file.Close()
+		defer func() {
+			if err := file.Close(); err != nil {
+				// Log error or handle as appropriate for your application
+				_ = err
+			}
+		}()
 
 		fileData, err := io.ReadAll(file)
 		if err != nil {
