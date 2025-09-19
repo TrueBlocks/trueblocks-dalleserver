@@ -1,6 +1,6 @@
 module github.com/TrueBlocks/trueblocks-dalleserver
 
-go 1.23.8
+go 1.25.1
 
 // Use local submodule for active development of trueblocks-dalle
 replace github.com/TrueBlocks/trueblocks-dalle/v2 => ./dalle
@@ -40,7 +40,7 @@ require (
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/holiman/uint256 v1.3.2 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/ipfs/boxo v0.29.1 // indirect
+	github.com/ipfs/boxo v0.30.0 // indirect
 	github.com/ipfs/go-cid v0.5.0 // indirect
 	github.com/ipfs/go-ipfs-api v0.7.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
