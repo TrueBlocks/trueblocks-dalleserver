@@ -1,5 +1,6 @@
 module github.com/TrueBlocks/trueblocks-dalleserver
 
+// GoLang Version
 go 1.25.1
 
 require (
