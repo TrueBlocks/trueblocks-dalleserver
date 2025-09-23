@@ -20,7 +20,7 @@ func main() {
 
 	// Fail fast if required OpenAI key missing (before starting server)
 	if os.Getenv("OPENAI_API_KEY") == "" {
-		fmt.Fprintln(os.Stderr, "WARNING: OPENAI_API_KEY not set; image generation will be skipped.")
+		panic("OPENAI_API_KEY is required but not set. Please configure your OpenAI API key and try again.")
 	}
 
 	// Initialize circuit breaker for OpenAI
