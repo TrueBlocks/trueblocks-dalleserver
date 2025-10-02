@@ -6,12 +6,14 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
 	"strconv"
 	"strings"
 	"syscall"
 	"time"
 
 	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/logger"
+	"github.com/TrueBlocks/trueblocks-dalle/v2/pkg/prompt"
 	"github.com/TrueBlocks/trueblocks-dalle/v2/pkg/storage"
 )
 
@@ -28,6 +30,8 @@ func main() {
 
 	// Initialize health checker with circuit breaker
 	GetHealthChecker().SetCircuitBreaker(circuitBreaker)
+
+	printStartupReport()
 
 	mux := http.NewServeMux()
 
@@ -87,3 +91,45 @@ func getPort() string {
 	}
 	return port
 }
+
+// Build-time variables (set via ldflags during build)
+var (
+	BuildTime   = "unknown"
+	BuildCommit = "unknown"
+	BuildBranch = "unknown"
+	Version     = "development"
+)
+
+// printStartupReport displays build and runtime information when the server starts
+func printStartupReport() {
+	logger.InfoG("=== TrueBlocks DALLE Server Startup Report ===")
+	logger.InfoG(fmt.Sprintf("Version: %s", Version))
+	logger.InfoG(fmt.Sprintf("Build Time: %s", BuildTime))
+	logger.InfoG(fmt.Sprintf("Build Commit: %s", BuildCommit))
+	logger.InfoG(fmt.Sprintf("Build Branch: %s", BuildBranch))
+	logger.InfoG(fmt.Sprintf("Go Version: %s", runtime.Version()))
+	logger.InfoG(fmt.Sprintf("Go OS/Arch: %s/%s", runtime.GOOS, runtime.GOARCH))
+	logger.InfoG(fmt.Sprintf("Start Time: %s", time.Now().Format("2006-01-02 15:04:05 MST")))
+
+	logger.InfoG("--- Database Information ---")
+	cm := storage.GetCacheManager()
+	if err := cm.LoadOrBuild(); err != nil {
+		logger.InfoG(fmt.Sprintf("ERROR: Failed to load cache: %v", err))
+		return
+	}
+
+	totalRecords := 0
+	for _, dbName := range prompt.DatabaseNames {
+		if dbIndex, err := cm.GetDatabase(dbName); err == nil {
+			recordCount := len(dbIndex.Records)
+			totalRecords += recordCount
+			logger.InfoG(fmt.Sprintf("Database: %-12s Records: %3d Version: %s", dbName, recordCount, dbIndex.Version))
+		} else {
+			logger.InfoG(fmt.Sprintf("Database: %-12s Error: %v", dbName, err))
+		}
+	}
+
+	logger.InfoG(fmt.Sprintf("Total Records: %d across %d databases", totalRecords, len(prompt.DatabaseNames)))
+	logger.InfoG("============================================")
+}
+

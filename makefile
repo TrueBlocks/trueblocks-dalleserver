@@ -1,10 +1,23 @@
+BUILD_TIME := $(shell date -u '+%Y-%m-%d %H:%M:%S UTC')
+BUILD_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+BUILD_BRANCH := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+VERSION := $(shell git describe --tags --exact-match 2>/dev/null || echo "development")
+
+LDFLAGS := -X 'main.BuildTime=$(BUILD_TIME)' \
+		   -X 'main.BuildCommit=$(BUILD_COMMIT)' \
+		   -X 'main.BuildBranch=$(BUILD_BRANCH)' \
+		   -X 'main.Version=$(VERSION)'
+
 all:
-	go build ./...
+	go build -ldflags "$(LDFLAGS)" ./...
+
+build:
+	go build -ldflags "$(LDFLAGS)" -o trueblocks-dalleserver .
 
 serve:
 	@make test
 	@$(MAKE) -j 12 all
-	@go run .
+	@go run -ldflags "$(LDFLAGS)" .
 
 lint:
 	golangci-lint run ./...
