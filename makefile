@@ -11,7 +11,6 @@ lint:
 
 test:
 	@TB_DALLE_SKIP_IMAGE=1 go test ./...
-	@cd dalle ; TB_DALLE_SKIP_IMAGE=1 go test ./... ; cd - 2>/dev/null
 
 build-db:
 	@cd dalle ; make build-db ; cd - 2>/dev/null

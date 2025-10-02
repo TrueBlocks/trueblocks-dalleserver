@@ -3,6 +3,9 @@ module github.com/TrueBlocks/trueblocks-dalleserver
 // GoLang Version
 go 1.25.1
 
+replace github.com/TrueBlocks/trueblocks-dalle/v2 => ../libs/trueblocks-dalle
+replace github.com/TrueBlocks/trueblocks-sdk/v5 => ../libs/trueblocks-sdk
+
 require (
 	github.com/TrueBlocks/trueblocks-core/src/apps/chifra v0.0.0-20250928042956-de9ea31404b7
 	github.com/TrueBlocks/trueblocks-dalle/v2 v2.0.0-20250918192706-fe9276cdab92
