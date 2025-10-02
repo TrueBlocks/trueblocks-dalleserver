@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 	"net/http"
 	"os"
@@ -10,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/logger"
 	"github.com/TrueBlocks/trueblocks-dalle/v2/pkg/storage"
 )
 
@@ -74,12 +72,7 @@ function filterSeries(){const q=document.getElementById('filter').value.toLowerC
 </body></html>`))
 
 func (a *App) handlePreview(w http.ResponseWriter, r *http.Request) {
-	requestID := GenerateRequestID()
-	logger.Info(fmt.Sprintf("[%s] handlePreview: Starting preview generation", requestID))
-
 	root := storage.OutputDir()
-	logger.Info(fmt.Sprintf("[%s] handlePreview: Scanning root directory: %s", requestID, root))
-
 	var images []imageMeta
 	_ = filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -97,13 +90,11 @@ func (a *App) handlePreview(w http.ResponseWriter, r *http.Request) {
 		rel, _ := filepath.Rel(root, path)
 		parts := strings.Split(rel, string(filepath.Separator))
 		if len(parts) < 3 {
-			logger.Warn(fmt.Sprintf("[%s] handlePreview: Skipping file with insufficient path parts: %s (parts: %v)", requestID, path, parts))
 			return nil
 		}
 		series := parts[0]
 		addressFile := parts[len(parts)-1]
 		address := strings.TrimSuffix(addressFile, filepath.Ext(addressFile))
-		logger.Info(fmt.Sprintf("[%s] handlePreview: Processing image - series: %s, address: %s, path: %s", requestID, series, address, rel))
 		info, statErr := os.Stat(path)
 		if statErr != nil {
 			return nil
@@ -111,26 +102,20 @@ func (a *App) handlePreview(w http.ResponseWriter, r *http.Request) {
 		images = append(images, imageMeta{Series: series, Address: address, Path: rel, ModTime: info.ModTime()})
 		return nil
 	})
-	logger.Info(fmt.Sprintf("[%s] handlePreview: Found %d total images", requestID, len(images)))
-
 	bySeries := map[string][]imageMeta{}
 	for _, im := range images {
 		bySeries[im.Series] = append(bySeries[im.Series], im)
 	}
-	logger.Info(fmt.Sprintf("[%s] handlePreview: Grouped into %d series", requestID, len(bySeries)))
-
 	for k := range bySeries {
 		list := bySeries[k]
 		sort.Slice(list, func(i, j int) bool { return list[i].ModTime.After(list[j].ModTime) })
 		bySeries[k] = list
-		logger.Info(fmt.Sprintf("[%s] handlePreview: Series '%s' has %d images", requestID, k, len(list)))
 	}
 	keys := make([]string, 0, len(bySeries))
 	for k := range bySeries {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
-	logger.Info(fmt.Sprintf("[%s] handlePreview: Series keys (sorted): %v", requestID, keys))
 	data := struct {
 		Images   []imageMeta
 		BySeries map[string][]imageMeta
