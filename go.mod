@@ -3,12 +3,12 @@ module github.com/TrueBlocks/trueblocks-dalleserver
 // GoLang Version
 go 1.25.1
 
-replace github.com/TrueBlocks/trueblocks-dalle/v2 => ../libs/trueblocks-dalle
+replace github.com/TrueBlocks/trueblocks-dalle/v2 => ./dalle
 
-replace github.com/TrueBlocks/trueblocks-sdk/v5 => ../libs/trueblocks-sdk
+replace github.com/TrueBlocks/trueblocks-sdk/v5 => ../trueblocks-core/sdk
 
 require (
-	github.com/TrueBlocks/trueblocks-core/src/apps/chifra v0.0.0-20250928045016-814dde303ad8
+	github.com/TrueBlocks/trueblocks-core/src/apps/chifra v0.0.0-20250928224928-4f014a075626
 	github.com/TrueBlocks/trueblocks-dalle/v2 v2.0.0-20251002034425-75747c186a28
 	github.com/google/uuid v1.6.0
 )
@@ -16,7 +16,7 @@ require (
 require (
 	git.sr.ht/~sbinet/gg v0.6.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
-	github.com/TrueBlocks/trueblocks-sdk/v5 v5.9.3 // indirect
+	github.com/TrueBlocks/trueblocks-sdk/v5 v5.9.4-0.20250928224802-1db0ab4592d3 // indirect
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
 	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/bits-and-blooms/bitset v1.22.0 // indirect
