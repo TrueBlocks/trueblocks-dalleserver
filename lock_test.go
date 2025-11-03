@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
+	dalle "github.com/TrueBlocks/trueblocks-dalle/v6"
 )
 
 // TestConcurrentGenerate ensures lock prevents redundant heavy work; we just assert no errors and same path.

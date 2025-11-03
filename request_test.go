@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"testing"
 
-	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
+	dalle "github.com/TrueBlocks/trueblocks-dalle/v6"
 )
 
 func TestParseRequest(t *testing.T) {

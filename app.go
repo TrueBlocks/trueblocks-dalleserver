@@ -6,9 +6,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/base"
-	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
-	"github.com/TrueBlocks/trueblocks-dalle/v2/pkg/storage"
+	"github.com/TrueBlocks/trueblocks-chifra/v6/pkg/base"
+	dalle "github.com/TrueBlocks/trueblocks-dalle/v6"
+	"github.com/TrueBlocks/trueblocks-dalle/v6/pkg/storage"
 )
 
 type App struct {

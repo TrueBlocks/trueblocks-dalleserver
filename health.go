@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/logger"
+	"github.com/TrueBlocks/trueblocks-chifra/v6/pkg/logger"
 )
 
 // HealthStatus represents the overall health status

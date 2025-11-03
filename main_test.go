@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
+	dalle "github.com/TrueBlocks/trueblocks-dalle/v6"
 )
 
 func TestMainRequestRespond(t *testing.T) {

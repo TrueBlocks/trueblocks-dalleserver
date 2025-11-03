@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
+	dalle "github.com/TrueBlocks/trueblocks-dalle/v6"
 )
 
 // Test error paths on the /dalle/ handler surface proper 400s with expected messages.

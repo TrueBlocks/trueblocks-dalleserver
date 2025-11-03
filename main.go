@@ -12,9 +12,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/logger"
-	"github.com/TrueBlocks/trueblocks-dalle/v2/pkg/prompt"
-	"github.com/TrueBlocks/trueblocks-dalle/v2/pkg/storage"
+	"github.com/TrueBlocks/trueblocks-chifra/v6/pkg/logger"
+	"github.com/TrueBlocks/trueblocks-dalle/v6/pkg/prompt"
+	"github.com/TrueBlocks/trueblocks-dalle/v6/pkg/storage"
 )
 
 func main() {
@@ -132,4 +132,3 @@ func printStartupReport() {
 	logger.InfoG(fmt.Sprintf("Total Records: %d across %d databases", totalRecords, len(prompt.DatabaseNames)))
 	logger.InfoG("============================================")
 }
-

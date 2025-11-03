@@ -3,29 +3,22 @@ module github.com/TrueBlocks/trueblocks-dalleserver
 // GoLang Version
 go 1.25.1
 
-replace (
-	github.com/TrueBlocks/trueblocks-dalle/v2 => ../libs/trueblocks-dalle
-	github.com/TrueBlocks/trueblocks-sdk/v5 => ../libs/trueblocks-sdk
-)
-
 require (
-	github.com/TrueBlocks/trueblocks-core/src/apps/chifra v0.0.0-20250928224928-4f014a075626
-	github.com/TrueBlocks/trueblocks-dalle/v2 v2.0.0-20251002034425-75747c186a28
+	github.com/TrueBlocks/trueblocks-chifra/v6 v6.4.5
+	github.com/TrueBlocks/trueblocks-dalle/v6 v6.4.5
 	github.com/google/uuid v1.6.0
 )
 
 require (
-	git.sr.ht/~sbinet/gg v0.6.0 // indirect
+	git.sr.ht/~sbinet/gg v0.7.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
-	github.com/TrueBlocks/trueblocks-sdk/v5 v5.9.4-0.20250928224802-1db0ab4592d3 // indirect
+	github.com/TrueBlocks/trueblocks-sdk/v6 v6.4.1 // indirect
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
 	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/bits-and-blooms/bitset v1.22.0 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/bykof/gostradamus v1.1.2 // indirect
-	github.com/campoy/embedmd v1.0.0 // indirect
-	github.com/consensys/bavard v0.1.30 // indirect
-	github.com/consensys/gnark-crypto v0.17.0 // indirect
+	github.com/consensys/gnark-crypto v0.18.1 // indirect
 	github.com/crackcomm/go-gitignore v0.0.0-20241020182519-7843d2ba8fdf // indirect
 	github.com/crate-crypto/go-ipa v0.0.0-20240724233137-53bbb0ceb27a // indirect
 	github.com/crate-crypto/go-kzg-4844 v1.1.0 // indirect
@@ -50,10 +43,9 @@ require (
 	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
 	github.com/libp2p/go-flow-metrics v0.2.0 // indirect
 	github.com/libp2p/go-libp2p v0.41.1 // indirect
-	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
+	github.com/lucasb-eyer/go-colorful v1.3.0 // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
-	github.com/mmcloughlin/addchain v0.4.0 // indirect
 	github.com/mr-tron/base58 v1.2.0 // indirect
 	github.com/multiformats/go-base32 v0.1.0 // indirect
 	github.com/multiformats/go-base36 v0.2.0 // indirect
@@ -66,7 +58,6 @@ require (
 	github.com/panjf2000/ants/v2 v2.11.3 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/cobra v1.9.1 // indirect
@@ -79,14 +70,13 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	golang.org/x/crypto v0.37.0 // indirect
 	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0 // indirect
-	golang.org/x/image v0.26.0 // indirect
+	golang.org/x/image v0.30.0 // indirect
 	golang.org/x/net v0.39.0 // indirect
-	golang.org/x/sync v0.13.0 // indirect
+	golang.org/x/sync v0.16.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
 	golang.org/x/term v0.31.0 // indirect
-	golang.org/x/text v0.24.0 // indirect
+	golang.org/x/text v0.28.0 // indirect
 	golang.org/x/time v0.11.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	lukechampine.com/blake3 v1.4.1 // indirect
-	rsc.io/tmplfunc v0.0.3 // indirect
 )

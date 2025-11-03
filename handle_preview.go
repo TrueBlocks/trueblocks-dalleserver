@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/TrueBlocks/trueblocks-dalle/v2/pkg/storage"
+	"github.com/TrueBlocks/trueblocks-dalle/v6/pkg/storage"
 )
 
 // imageMeta holds minimal data for gallery rendering.

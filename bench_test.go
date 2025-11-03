@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
+	dalle "github.com/TrueBlocks/trueblocks-dalle/v6"
 )
 
 func BenchmarkGenerateAnnotatedImage(b *testing.B) {

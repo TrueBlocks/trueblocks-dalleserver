@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/TrueBlocks/trueblocks-dalle/v2/pkg/storage"
+	"github.com/TrueBlocks/trueblocks-dalle/v6/pkg/storage"
 )
 
 // TestComputeDataDirPrecedence verifies flag > env > default precedence using helper.

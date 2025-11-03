@@ -9,12 +9,12 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/file"
-	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/logger"
-	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
-	"github.com/TrueBlocks/trueblocks-dalle/v2/pkg/progress"
-	"github.com/TrueBlocks/trueblocks-dalle/v2/pkg/prompt"
-	"github.com/TrueBlocks/trueblocks-dalle/v2/pkg/storage"
+	"github.com/TrueBlocks/trueblocks-chifra/v6/pkg/file"
+	"github.com/TrueBlocks/trueblocks-chifra/v6/pkg/logger"
+	dalle "github.com/TrueBlocks/trueblocks-dalle/v6"
+	"github.com/TrueBlocks/trueblocks-dalle/v6/pkg/progress"
+	"github.com/TrueBlocks/trueblocks-dalle/v6/pkg/prompt"
+	"github.com/TrueBlocks/trueblocks-dalle/v6/pkg/storage"
 )
 
 var isDebugging = false

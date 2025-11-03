@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/TrueBlocks/trueblocks-core/src/apps/chifra/pkg/logger"
-	dalle "github.com/TrueBlocks/trueblocks-dalle/v2"
+	"github.com/TrueBlocks/trueblocks-chifra/v6/pkg/logger"
+	dalle "github.com/TrueBlocks/trueblocks-dalle/v6"
 )
 
 func (a *App) handleSeries(w http.ResponseWriter, r *http.Request) {
