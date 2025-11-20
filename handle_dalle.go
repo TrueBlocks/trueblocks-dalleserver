@@ -13,7 +13,6 @@ import (
 	"github.com/TrueBlocks/trueblocks-chifra/v6/pkg/logger"
 	dalle "github.com/TrueBlocks/trueblocks-dalle/v6"
 	"github.com/TrueBlocks/trueblocks-dalle/v6/pkg/progress"
-	"github.com/TrueBlocks/trueblocks-dalle/v6/pkg/prompt"
 	"github.com/TrueBlocks/trueblocks-dalle/v6/pkg/storage"
 )
 
