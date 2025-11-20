@@ -66,17 +66,10 @@ func (req *Request) Respond(w io.Writer, r *http.Request) {
 			logger.Info(fmt.Sprintf("[%s] starting generation goroutine (if lock acquired)", req.requestID))
 			go func(series, addr, requestID string) {
 				start := time.Now()
+
 				if path, err := generateAnnotatedImage(series, addr, req.app.Config.SkipImage || os.Getenv("TB_DALLE_SKIP_IMAGE") == "1", req.app.Config.LockTTL); err != nil {
 					logger.InfoR(fmt.Sprintf("[%s] error generating image:", requestID), err)
-					if apiErr, ok := err.(*prompt.OpenAIAPIError); ok {
-						logger.InfoR(fmt.Sprintf("[DEBUG] handle_dalle.go: OpenAIAPIError detected, code: %s, message: %s", apiErr.Code, apiErr.Message))
-						fmt.Printf("[DEBUG] handle_dalle.go: Recording OpenAI error code in metrics: %s\n", apiErr.Code)
-						GetMetricsCollector().RecordError(apiErr.Code, "/dalle/", requestID)
-					} else {
-						logger.InfoR(fmt.Sprintf("[DEBUG] handle_dalle.go: Non-OpenAIAPIError, type: %T, error: %v", err, err))
-						fmt.Printf("[DEBUG] handle_dalle.go: Recording GENERATION_ERROR in metrics\n")
-						GetMetricsCollector().RecordError("GENERATION_ERROR", "/dalle/", requestID)
-					}
+					GetMetricsCollector().RecordError("GENERATION_ERROR", "/dalle/", requestID)
 				} else {
 					if file.FileExists(path) {
 						logger.InfoG(fmt.Sprintf("[%s] generated image for %s/%s in %s", requestID, series, addr, time.Since(start)))
@@ -89,6 +82,7 @@ func (req *Request) Respond(w io.Writer, r *http.Request) {
 	} else {
 		if _, err := generateAnnotatedImage(req.series, req.address, req.app.Config.SkipImage || os.Getenv("TB_DALLE_SKIP_IMAGE") == "1", req.app.Config.LockTTL); err != nil {
 			logger.InfoR(fmt.Sprintf("[%s] error generating image:", req.requestID), err)
+			GetMetricsCollector().RecordError("GENERATION_ERROR", "/dalle/", req.requestID)
 		}
 	}
 

@@ -43,6 +43,7 @@ func main() {
 	mux.HandleFunc("/health", WrapWithMiddleware(app.handleHealth, circuitBreaker))
 	mux.HandleFunc("/metrics", WrapWithMiddleware(app.handleMetrics, circuitBreaker))
 	mux.HandleFunc("/preview", WrapWithMiddleware(app.handlePreview, circuitBreaker))
+	mux.HandleFunc("/errors", WrapWithMiddleware(handleErrors, circuitBreaker))
 	mux.Handle("/files/", http.StripPrefix("/files/", http.FileServer(http.Dir(storage.OutputDir()))))
 
 	startStatusPrinter(0)
