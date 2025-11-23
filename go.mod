@@ -4,7 +4,7 @@ module github.com/TrueBlocks/trueblocks-dalleserver
 go 1.25.1
 
 require (
-	github.com/TrueBlocks/trueblocks-chifra/v6 v6.5.1-0.20251122032052-f2d3b255c1cc
+	github.com/TrueBlocks/trueblocks-chifra/v6 v6.6.5
 	github.com/TrueBlocks/trueblocks-dalle/v6 v6.4.5
 	github.com/google/uuid v1.6.0
 )
@@ -13,7 +13,7 @@ require (
 	git.sr.ht/~sbinet/gg v0.7.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProjectZKM/Ziren/crates/go-runtime/zkvm_runtime v0.0.0-20251001021608-1fe7b43fc4d6 // indirect
-	github.com/TrueBlocks/trueblocks-sdk/v6 v6.5.1 // indirect
+	github.com/TrueBlocks/trueblocks-sdk/v6 v6.6.5 // indirect
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
 	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/bits-and-blooms/bitset v1.22.0 // indirect
