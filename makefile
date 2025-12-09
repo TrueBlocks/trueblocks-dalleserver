@@ -43,3 +43,8 @@ benchmark:
 book:
 	$(MAKE) -C book serve
 
+# Build documentation book (mdBook) without serving
+.PHONY: build-book
+build-book:
+	$(MAKE) -C book book
+

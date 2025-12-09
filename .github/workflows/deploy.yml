@@ -2,8 +2,12 @@ name: Deploy to Production
 
 on:
     push:
-        tags:
-            - "v*"
+        branches:
+            - main
+    # Commented out for testing - uncomment to trigger on tags only
+    # push:
+    #     tags:
+    #         - "v*"
 
 jobs:
     deploy:
