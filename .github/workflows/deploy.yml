@@ -1,0 +1,28 @@
+name: Deploy to Production
+
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Deploy to server
+              uses: appleboy/ssh-action@master
+              with:
+                  host: 167.71.187.196
+                  username: jrush
+                  key: ${{ secrets.DEPLOY_SSH_KEY }}
+                  script: |
+                      cd ~/Development/trueblocks-dalleserver
+                      git fetch origin main
+                      git checkout main
+                      git pull origin main
+                      make build
+                      sudo systemctl restart dalleserver
+                      sudo systemctl status dalleserver
