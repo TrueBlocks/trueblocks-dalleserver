@@ -237,6 +237,69 @@ sudo systemctl daemon-reload
 sudo systemctl restart dalleserver
 ```
 
+## Phase 2: GitHub Actions CI/CD Setup
+
+A GitHub Actions workflow has been configured to automatically deploy new versions when you tag the repository.
+
+### Workflow Trigger
+
+The workflow triggers on git tags matching the pattern `v*` (e.g., `v1.2.3`, `v2.0.0`).
+
+### How to Deploy
+
+To deploy a new version:
+
+```bash
+# Make and commit your changes
+git add .
+git commit -m "Your message"
+
+# Create a tag
+git tag v1.2.3
+
+# Push the tag to GitHub
+git push origin v1.2.3
+```
+
+GitHub Actions will automatically:
+1. Check out the tagged version
+2. Build the binary with version information from the tag
+3. SSH into 167.71.187.196
+4. Pull the tagged code
+5. Rebuild the binary
+6. Restart the systemd service
+
+### Monitoring Deployments
+
+Watch the deployment progress in GitHub:
+
+1. Go to your repository on GitHub
+2. Click the **Actions** tab
+3. Select the running "Deploy to Production" workflow
+4. View real-time logs as the deployment progresses
+
+### GitHub Secrets Required
+
+The workflow uses `secrets.DEPLOY_SSH_KEY` to authenticate to the server. This must be configured in your GitHub repository settings:
+
+1. Go to **Settings** → **Secrets and variables** → **Actions**
+2. Create a secret named `DEPLOY_SSH_KEY`
+3. Paste the contents of the `id_rsa` private key
+
+### Sudo Without Password
+
+The workflow runs `sudo systemctl` commands without a password. This is configured on the server with:
+
+```bash
+sudo visudo
+```
+
+And adding:
+
+```
+jrush ALL=(ALL) NOPASSWD: /bin/systemctl
+```
+
 ## Future Updates
 
 Once this setup is complete, you can deploy new versions by simply tagging the repo:
@@ -246,9 +309,6 @@ git tag v1.2.3
 git push origin v1.2.3
 ```
 
-GitHub Actions will automatically:
-1. Build the new version
-2. Deploy it to 167.71.187.196
-3. Restart the service
+GitHub Actions will automatically build, deploy, and restart the service on 167.71.187.196.
 
 You can monitor the deployment in the GitHub Actions tab of your repository.

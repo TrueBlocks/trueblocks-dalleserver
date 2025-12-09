@@ -2,8 +2,8 @@ name: Deploy to Production
 
 on:
     push:
-        branches:
-            - main
+        tags:
+            - "v*"
 
 jobs:
     deploy:
@@ -20,9 +20,8 @@ jobs:
                   key: ${{ secrets.DEPLOY_SSH_KEY }}
                   script: |
                       cd ~/Development/trueblocks-dalleserver
-                      git fetch origin main
-                      git checkout main
-                      git pull origin main
+                      git fetch origin ${{ github.ref_name }}
+                      git checkout ${{ github.ref_name }}
                       make build
                       sudo systemctl restart dalleserver
                       sudo systemctl status dalleserver
