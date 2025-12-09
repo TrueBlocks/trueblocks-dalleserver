@@ -244,7 +244,7 @@
               }
             ]
           },
-          "unit": "reqps"
+          "unit": "short"
         },
         "overrides": []
       },
@@ -269,11 +269,11 @@
       },
       "targets": [
         {
-          "expr": "rate(http_requests_total[5m])",
+          "expr": "rate(dalleserver_openai_requests_total[5m])",
           "refId": "A"
         }
       ],
-      "title": "HTTP Requests (5m rate)",
+      "title": "OpenAI Requests (5m rate)",
       "type": "timeseries"
     },
     {
@@ -326,7 +326,7 @@
               }
             ]
           },
-          "unit": "ms"
+          "unit": "short"
         },
         "overrides": []
       },
@@ -351,11 +351,11 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+          "expr": "dalleserver_errors_total",
           "refId": "A"
         }
       ],
-      "title": "HTTP Response Time (p95)",
+      "title": "Total Errors",
       "type": "timeseries"
     }
   ],
