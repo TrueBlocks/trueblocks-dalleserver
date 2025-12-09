@@ -3,9 +3,9 @@
 An example HTTP server demonstrating how to build image experiences on top of the
 [`trueblocks-dalle`](https://github.com/TrueBlocks/trueblocks-dalle) Go package.
 
-It turns Ethereum addresses into consistently generated, stylistically filtered ("series") images.
-This repo shows a server approach; a companion desktop / direct usage example can build images
-without HTTP by calling the same library functions.
+It turns Ethereum addresses into consistently generated, stylistically filtered ("series")
+images. This repo shows a server approach; a companion desktop / direct usage example can
+build images without HTTP by calling the same library functions.
 
 ![CI](https://github.com/TrueBlocks/trueblocks-dalleserver/actions/workflows/ci.yml/badge.svg?branch=develop)
 
