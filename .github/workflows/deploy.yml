@@ -2,12 +2,8 @@ name: Deploy to Production
 
 on:
     push:
-        branches:
-            - main
-    # Commented out for testing - uncomment to trigger on tags only
-    # push:
-    #     tags:
-    #         - "v*"
+        tags:
+            - "v*"
 
 jobs:
     deploy:
@@ -28,5 +24,6 @@ jobs:
                       git checkout ${{ github.ref_name }}
                       git pull origin ${{ github.ref_name }}
                       make build
+                      make build-book
                       sudo systemctl restart dalleserver
                       sudo systemctl status dalleserver
