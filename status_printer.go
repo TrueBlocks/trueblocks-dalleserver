@@ -79,7 +79,7 @@ func startStatusPrinter(interval time.Duration) {
 		}
 
 		if len(rows) == 0 {
-			logger.Info("(no active runs)")
+			// logger.Info("(no active runs)")
 		} else {
 			if len(rows) > 1 {
 				logger.Info("")
