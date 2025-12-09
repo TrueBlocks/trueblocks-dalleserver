@@ -5,7 +5,7 @@ go 1.25.1
 
 require (
 	github.com/TrueBlocks/trueblocks-chifra/v6 v6.6.6-0.20251201032710-ec810bb48eb0
-	github.com/TrueBlocks/trueblocks-dalle/v6 v6.6.5
+	github.com/TrueBlocks/trueblocks-dalle/v6 v6.6.6
 	github.com/google/uuid v1.6.0
 )
 
