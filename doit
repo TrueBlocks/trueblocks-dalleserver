@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# This script iterates through each line in the 'series' file,
+# and for each series, it iterates through every line in the 'addresses' file.
+# It then calls './doit.1' with each combination.
+
+while IFS= read -r series_item; do
+  # Skip empty lines in series file
+  if [ -z "$series_item" ]; then
+    continue
+  fi
+
+  while IFS= read -r address_item; do
+    # Skip empty lines in addresses file
+    if [ -z "$address_item" ]; then
+      continue
+    fi
+    
+    # Call the other script with the items as arguments
+    ./doit.1 "$series_item" "$address_item" "$@"
+  done < "addresses"
+done < "series"
