@@ -12,6 +12,7 @@ all:
 	go build -ldflags "$(LDFLAGS)" ./...
 
 build:
+	go get -u ./...
 	go build -ldflags "$(LDFLAGS)" -o trueblocks-dalleserver .
 
 serve:
