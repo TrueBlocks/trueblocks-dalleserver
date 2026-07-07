@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 
 	dalle "github.com/TrueBlocks/trueblocks-dalle/v6"
@@ -63,6 +64,20 @@ func (a *App) handleV1Images(w http.ResponseWriter, r *http.Request) {
 func (a *App) handleV1Image(w http.ResponseWriter, r *http.Request) {
 	requestID := GenerateRequestID()
 	id := strings.TrimPrefix(r.URL.Path, "/v1/images/")
+	if strings.HasSuffix(id, "/regenerate") {
+		if r.Method != http.MethodPost {
+			writeV1Error(w, requestID, http.StatusMethodNotAllowed, dalle.ErrInvalidInput, "method not allowed")
+			return
+		}
+		id = strings.TrimSuffix(id, "/regenerate")
+		result, err := a.Engine.RegenerateImage(id)
+		if err != nil {
+			writeV1EngineError(w, requestID, err)
+			return
+		}
+		WriteSuccessResponse(w, result, requestID)
+		return
+	}
 	if strings.HasSuffix(id, "/export") {
 		if r.Method != http.MethodPost {
 			writeV1Error(w, requestID, http.StatusMethodNotAllowed, dalle.ErrInvalidInput, "method not allowed")
@@ -82,6 +97,14 @@ func (a *App) handleV1Image(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		WriteSuccessResponse(w, result, requestID)
+		return
+	}
+	if r.Method == http.MethodDelete {
+		if err := a.Engine.DeleteImage(id); err != nil {
+			writeV1EngineError(w, requestID, err)
+			return
+		}
+		WriteSuccessResponse(w, map[string]bool{"deleted": true}, requestID)
 		return
 	}
 	if r.Method != http.MethodGet {
@@ -186,7 +209,31 @@ func (a *App) handleV1Database(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	requestID := GenerateRequestID()
-	version := strings.TrimPrefix(r.URL.Path, "/v1/databases/")
+	path := strings.TrimPrefix(r.URL.Path, "/v1/databases/")
+	if strings.Contains(path, "/records/") {
+		parts := strings.SplitN(path, "/records/", 2)
+		name := ""
+		if len(parts) == 2 {
+			name = parts[1]
+		}
+		limit := 200
+		if rawLimit := strings.TrimSpace(r.URL.Query().Get("limit")); rawLimit != "" {
+			parsed, err := strconv.Atoi(rawLimit)
+			if err != nil {
+				writeV1Error(w, requestID, http.StatusBadRequest, dalle.ErrInvalidInput, "invalid limit")
+				return
+			}
+			limit = parsed
+		}
+		result, err := a.Engine.ListDatabaseRecords(name, limit)
+		if err != nil {
+			writeV1EngineError(w, requestID, err)
+			return
+		}
+		WriteSuccessResponse(w, result, requestID)
+		return
+	}
+	version := path
 	archive, err := a.Engine.GetDatabaseArchive(version)
 	if err != nil {
 		writeV1EngineError(w, requestID, err)

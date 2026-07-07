@@ -104,3 +104,46 @@ func TestHandleV1ImageMissingMapsToNotFound(t *testing.T) {
 		t.Fatalf("expected artifact missing error: %#v", response)
 	}
 }
+
+func TestHandleV1ImageDelete(t *testing.T) {
+	app := newV1TestApp(t)
+	result, err := app.Engine.Generate(dalle.GenerateRequest{Input: "Person Tour Coordinates"})
+	if err != nil {
+		t.Fatalf("Generate: %v", err)
+	}
+	request := httptest.NewRequest(http.MethodDelete, "/v1/images/"+result.Metadata.ImageID, nil)
+	recorder := httptest.NewRecorder()
+
+	app.handleV1Image(recorder, request)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d: %s", recorder.Code, recorder.Body.String())
+	}
+	if _, err := app.Engine.GetImage(result.Metadata.ImageID); dalle.ErrorCodeOf(err) != dalle.ErrArtifactMissing {
+		t.Fatalf("expected deleted image lookup to fail, got %v", err)
+	}
+}
+
+func TestHandleV1DatabaseRecords(t *testing.T) {
+	app := newV1TestApp(t)
+	request := httptest.NewRequest(http.MethodGet, "/v1/databases/1.0.0/records/nouns?limit=2", nil)
+	recorder := httptest.NewRecorder()
+
+	app.handleV1Database(recorder, request)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d: %s", recorder.Code, recorder.Body.String())
+	}
+	response := decodeAPIResponse(t, recorder)
+	encoded, err := json.Marshal(response.Data)
+	if err != nil {
+		t.Fatalf("marshal response data: %v", err)
+	}
+	var result dalle.DatabaseRecordsResult
+	if err := json.Unmarshal(encoded, &result); err != nil {
+		t.Fatalf("decode records result: %v", err)
+	}
+	if result.Name != "nouns" || len(result.Records) != 2 {
+		t.Fatalf("unexpected records result: %#v", result)
+	}
+}
