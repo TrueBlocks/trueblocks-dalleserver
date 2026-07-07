@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"runtime"
 	"time"
-
-	"github.com/TrueBlocks/trueblocks-chifra/v6/pkg/logger"
 )
 
 // HealthStatus represents the overall health status
@@ -125,7 +123,7 @@ func (hc *HealthChecker) checkFileSystemHealth(requestID string) ComponentHealth
 	duration := time.Since(start)
 
 	if err != nil {
-		logger.Error(fmt.Sprintf("[%s] File system health check failed: %v", requestID, err))
+		logError(fmt.Sprintf("[%s] File system health check failed: %v", requestID, err))
 		return ComponentHealth{
 			Name:        "filesystem",
 			Status:      HealthStatusUnhealthy,

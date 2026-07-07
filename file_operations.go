@@ -8,8 +8,6 @@ import (
 	"strings"
 	"syscall"
 	"time"
-
-	"github.com/TrueBlocks/trueblocks-chifra/v6/pkg/logger"
 )
 
 // FileSystemError represents file system operation errors
@@ -283,7 +281,7 @@ func (rfo *RobustFileOperations) ValidateWriteAccess(dirPath, requestID string) 
 	// Clean up test file
 	_ = rfo.RemoveFile(testFile, requestID)
 
-	logger.Info(fmt.Sprintf("[%s] Write access validated for %s", requestID, dirPath))
+	logInfo(fmt.Sprintf("[%s] Write access validated for %s", requestID, dirPath))
 	return nil
 }
 

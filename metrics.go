@@ -5,8 +5,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/TrueBlocks/trueblocks-chifra/v6/pkg/logger"
 )
 
 // ErrorMetrics tracks error-related metrics
@@ -118,7 +116,7 @@ func (mc *MetricsCollector) RecordError(errorCode, endpoint, requestID string) {
 	mc.metrics.ErrorsByEndpoint[endpoint]++
 	mc.metrics.LastUpdated = time.Now()
 
-	logger.Info(fmt.Sprintf("[%s] Error recorded: %s on %s", requestID, errorCode, endpoint))
+	logInfo(fmt.Sprintf("[%s] Error recorded: %s on %s", requestID, errorCode, endpoint))
 }
 
 // RecordRetry records a retry attempt
@@ -130,7 +128,7 @@ func (mc *MetricsCollector) RecordRetry(operation, requestID string) {
 	mc.metrics.RetriesByOperation[operation]++
 	mc.metrics.LastUpdated = time.Now()
 
-	logger.Info(fmt.Sprintf("[%s] Retry recorded for operation: %s", requestID, operation))
+	logInfo(fmt.Sprintf("[%s] Retry recorded for operation: %s", requestID, operation))
 }
 
 // RecordResponseTime records a response time measurement

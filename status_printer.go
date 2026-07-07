@@ -5,8 +5,6 @@ import (
 	"sort"
 	"time"
 
-	"github.com/TrueBlocks/trueblocks-chifra/v6/pkg/colors"
-	"github.com/TrueBlocks/trueblocks-chifra/v6/pkg/logger"
 	"github.com/TrueBlocks/trueblocks-dalle/v6/pkg/progress"
 )
 
@@ -19,13 +17,13 @@ func startStatusPrinter(interval time.Duration) {
 		interval = 2 * time.Second
 	}
 	// Print immediate startup notice + first status
-	logger.Info(fmt.Sprintf("[status] reporter started (interval=%s)", interval))
+	logInfo(fmt.Sprintf("[status] reporter started (interval=%s)", interval))
 
 	// Helper to build and output current status table; safe against panics
 	printStatus := func() {
 		defer func() {
 			if r := recover(); r != nil { // never die silently
-				logger.Info(fmt.Sprintf("[status] panic recovered: %v", r))
+				logInfo(fmt.Sprintf("[status] panic recovered: %v", r))
 			}
 		}()
 		reports := progress.ActiveProgressReports()
@@ -79,13 +77,13 @@ func startStatusPrinter(interval time.Duration) {
 		}
 
 		if len(rows) == 0 {
-			// logger.Info("(no active runs)")
+			// logInfo("(no active runs)")
 		} else {
 			if len(rows) > 1 {
-				logger.Info("")
+				logInfo("")
 			}
 			for _, r := range rows {
-				logger.Info(fmt.Sprintf(colors.BrightYellow+"%-*s  %-*s  %-*s  %*s  %-*s  %-*s  %-*s  %-*s"+colors.Off,
+				logInfo(fmt.Sprintf(brightYellow+"%-*s  %-*s  %-*s  %*s  %-*s  %-*s  %-*s  %-*s"+colorOff,
 					w.phase, r.phase,
 					w.address, r.address,
 					w.pct, r.pct,

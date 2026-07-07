@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-
-	"github.com/TrueBlocks/trueblocks-chifra/v6/pkg/logger"
 )
 
 // Metrics handler
@@ -27,5 +25,5 @@ func (app *App) handleMetrics(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(prometheusMetrics))
 	}
 
-	logger.Info(fmt.Sprintf("[%s] Metrics request served", requestID))
+	logInfo(fmt.Sprintf("[%s] Metrics request served", requestID))
 }

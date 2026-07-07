@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/TrueBlocks/trueblocks-chifra/v6/pkg/logger"
 	"github.com/TrueBlocks/trueblocks-dalle/v6/pkg/prompt"
 )
 
@@ -69,12 +68,12 @@ func (c *OpenAIClient) EnhancePromptWithResilience(prmt, authorType, requestID s
 	if err != nil {
 		// Check if circuit breaker blocked the request
 		if cbErr, ok := err.(*CircuitBreakerError); ok && cbErr.IsCircuitBreakerOpen() {
-			logger.InfoR(fmt.Sprintf("[%s] OpenAI circuit breaker is open, using non-enhanced prompt", requestID))
+			logInfo(fmt.Sprintf("[%s] OpenAI circuit breaker is open, using non-enhanced prompt", requestID))
 			return prmt, nil // Graceful degradation
 		}
 
 		// Log error but return original prompt for graceful degradation
-		logger.InfoR(fmt.Sprintf("[%s] OpenAI enhancement failed, using original prompt", requestID), "error", err)
+		logInfo(fmt.Sprintf("[%s] OpenAI enhancement failed, using original prompt", requestID), "error", err)
 		return prmt, nil
 	}
 
@@ -113,7 +112,7 @@ func (c *OpenAIClient) enhancePromptAttempt(prmt, authorType, requestID string) 
 	req.Header.Set("X-Request-ID", requestID)
 
 	start := time.Now()
-	logger.Info(fmt.Sprintf("[%s] OpenAI enhance request starting", requestID))
+	logInfo(fmt.Sprintf("[%s] OpenAI enhance request starting", requestID))
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -144,7 +143,7 @@ func (c *OpenAIClient) enhancePromptAttempt(prmt, authorType, requestID string) 
 	}
 
 	duration := time.Since(start)
-	logger.Info(fmt.Sprintf("[%s] OpenAI enhance request completed", requestID),
+	logInfo(fmt.Sprintf("[%s] OpenAI enhance request completed", requestID),
 		"durMs", duration.Milliseconds(), "status", resp.StatusCode)
 
 	if resp.StatusCode != http.StatusOK {
@@ -203,17 +202,17 @@ func (c *OpenAIClient) enhancePromptAttempt(prmt, authorType, requestID string) 
 	}
 
 	if len(response.Choices) == 0 {
-		logger.InfoR(fmt.Sprintf("[%s] OpenAI returned no choices", requestID))
+		logInfo(fmt.Sprintf("[%s] OpenAI returned no choices", requestID))
 		return prmt, nil // Return original
 	}
 
 	content := response.Choices[0].Message.Content
 	if content == "" {
-		logger.InfoR(fmt.Sprintf("[%s] OpenAI returned empty content", requestID))
+		logInfo(fmt.Sprintf("[%s] OpenAI returned empty content", requestID))
 		return prmt, nil // Return original
 	}
 
-	logger.InfoG(fmt.Sprintf("[%s] OpenAI enhancement successful", requestID),
+	logInfo(fmt.Sprintf("[%s] OpenAI enhancement successful", requestID),
 		"originalLen", len(prmt), "enhancedLen", len(content))
 	GetMetricsCollector().RecordOpenAIRequest(true, false, requestID)
 

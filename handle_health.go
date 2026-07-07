@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-
-	"github.com/TrueBlocks/trueblocks-chifra/v6/pkg/logger"
 )
 
 // Enhanced health handler with support for liveness and readiness checks via query parameters
@@ -26,7 +24,7 @@ func (app *App) handleHealth(w http.ResponseWriter, r *http.Request) {
 			"uptime":    time.Since(globalHealthChecker.startTime).Seconds(),
 		}, requestID)
 
-		logger.Info(fmt.Sprintf("[%s] Liveness check completed", requestID))
+		logInfo(fmt.Sprintf("[%s] Liveness check completed", requestID))
 		return
 
 	case "readiness":
@@ -45,7 +43,7 @@ func (app *App) handleHealth(w http.ResponseWriter, r *http.Request) {
 			"timestamp": time.Now(),
 		}, requestID)
 
-		logger.Info(fmt.Sprintf("[%s] Readiness check completed: ready", requestID))
+		logInfo(fmt.Sprintf("[%s] Readiness check completed: ready", requestID))
 		return
 
 	default:
@@ -75,7 +73,7 @@ func (app *App) handleHealth(w http.ResponseWriter, r *http.Request) {
 
 		WriteSuccessResponse(w, healthCheck, requestID)
 
-		logger.Info(fmt.Sprintf("[%s] Enhanced health check completed: %s (took %v)",
+		logInfo(fmt.Sprintf("[%s] Enhanced health check completed: %s (took %v)",
 			requestID, healthCheck.Status, duration))
 	}
 }

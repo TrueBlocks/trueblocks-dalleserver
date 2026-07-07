@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"strings"
 	"time"
-
-	"github.com/TrueBlocks/trueblocks-chifra/v6/pkg/logger"
 )
 
 // ResponseWriterWrapper wraps http.ResponseWriter to capture status code and response size
@@ -46,7 +44,7 @@ func MetricsMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		wrapper.Header().Set("X-Request-ID", requestID)
 
 		// Log request start
-		logger.Info(fmt.Sprintf("[%s] %s %s - Request started", requestID, r.Method, r.URL.Path))
+		logInfo(fmt.Sprintf("[%s] %s %s - Request started", requestID, r.Method, r.URL.Path))
 
 		// Execute the handler
 		next(wrapper, r)
@@ -66,7 +64,7 @@ func MetricsMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		}
 
 		// Log request completion
-		logger.Info(fmt.Sprintf("[%s] %s %s - %d (%v, %d bytes)",
+		logInfo(fmt.Sprintf("[%s] %s %s - %d (%v, %d bytes)",
 			requestID, r.Method, r.URL.Path, wrapper.statusCode, duration, wrapper.responseSize))
 	}
 }
@@ -84,7 +82,7 @@ func StructuredLoggingMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		userAgent := r.Header.Get("User-Agent")
 		clientIP := getClientIP(r)
 
-		logger.Info(fmt.Sprintf("[%s] REQUEST: %s %s | IP: %s | User-Agent: %s | Content-Length: %s",
+		logInfo(fmt.Sprintf("[%s] REQUEST: %s %s | IP: %s | User-Agent: %s | Content-Length: %s",
 			requestID, r.Method, r.URL.RequestURI(), clientIP, userAgent, r.Header.Get("Content-Length")))
 
 		// Wrap response writer to capture status
@@ -98,17 +96,17 @@ func StructuredLoggingMiddleware(next http.HandlerFunc) http.HandlerFunc {
 
 		// Enhanced response logging
 		duration := time.Since(start)
-		logger.Info(fmt.Sprintf("[%s] RESPONSE: %d | Size: %d bytes | Duration: %v | Endpoint: %s",
+		logInfo(fmt.Sprintf("[%s] RESPONSE: %d | Size: %d bytes | Duration: %v | Endpoint: %s",
 			requestID, wrapper.statusCode, wrapper.responseSize, duration, getEndpointName(r.URL.Path)))
 
 		// Log any concerning patterns
 		if duration > 5*time.Second {
-			logger.Warn(fmt.Sprintf("[%s] SLOW REQUEST: %v duration for %s %s",
+			logWarn(fmt.Sprintf("[%s] SLOW REQUEST: %v duration for %s %s",
 				requestID, duration, r.Method, r.URL.Path))
 		}
 
 		if wrapper.statusCode >= 500 {
-			logger.Error(fmt.Sprintf("[%s] SERVER ERROR: %d for %s %s",
+			logError(fmt.Sprintf("[%s] SERVER ERROR: %d for %s %s",
 				requestID, wrapper.statusCode, r.Method, r.URL.Path))
 		}
 	}
@@ -127,7 +125,7 @@ func CircuitBreakerMiddleware(circuitBreaker *CircuitBreaker) func(http.HandlerF
 
 				// For OpenAI-dependent endpoints, check circuit breaker
 				if isOpenAIDependentEndpoint(r.URL.Path) && metrics.State == CircuitOpen {
-					logger.Warn(fmt.Sprintf("[%s] Circuit breaker OPEN - degraded mode for %s", requestID, r.URL.Path))
+					logWarn(fmt.Sprintf("[%s] Circuit breaker OPEN - degraded mode for %s", requestID, r.URL.Path))
 					// Continue with request but it will fail gracefully in handler
 				}
 			}

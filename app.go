@@ -6,7 +6,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/TrueBlocks/trueblocks-chifra/v6/pkg/base"
 	dalle "github.com/TrueBlocks/trueblocks-dalle/v6"
 	"github.com/TrueBlocks/trueblocks-dalle/v6/pkg/storage"
 )
@@ -14,10 +13,16 @@ import (
 type App struct {
 	ValidSeries []string
 	Config      Config
+	Engine      *dalle.Engine
 }
 
 func NewApp() *App {
 	app := App{Config: MustLoadConfig()}
+	engine, err := dalle.New(dalle.Config{})
+	if err != nil {
+		panic(err)
+	}
+	app.Engine = engine
 	_ = os.MkdirAll(storage.OutputDir(), 0o750)
 	app.ValidSeries = dalle.ListSeries()
 	return &app
@@ -67,7 +72,7 @@ func (a *App) parseRequest(r *http.Request) (Request, *APIError) {
 	if len(address) == 0 {
 		return Request{}, ErrorMissingRequiredParameter("address").WithRequestID(requestID)
 	}
-	if !base.IsValidAddress(address) {
+	if !isValidLegacyID(address) {
 		return Request{}, ErrorInvalidAddressFormat(address).WithRequestID(requestID)
 	}
 
@@ -79,4 +84,16 @@ func (a *App) parseRequest(r *http.Request) (Request, *APIError) {
 		app:       a,
 		requestID: requestID,
 	}, nil
+}
+
+func isValidLegacyID(value string) bool {
+	if len(value) != 42 || !strings.HasPrefix(value, "0x") {
+		return false
+	}
+	for _, char := range value[2:] {
+		if !((char >= '0' && char <= '9') || (char >= 'a' && char <= 'f')) {
+			return false
+		}
+	}
+	return true
 }
