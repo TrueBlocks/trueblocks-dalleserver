@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/TrueBlocks/trueblocks-art/packages/creds"
 	"github.com/TrueBlocks/trueblocks-dalle/v6/pkg/prompt"
 )
 
@@ -241,9 +242,7 @@ func GetOpenAIClient() *OpenAIClient {
 	return globalOpenAIClient
 }
 
-// getOpenAIAPIKey safely retrieves the OpenAI API key
+// getOpenAIAPIKey retrieves the OpenAI API key from the credentials file.
 func getOpenAIAPIKey() string {
-	// This will be imported from environment or config
-	// For now, return empty - the client will handle missing keys gracefully
-	return ""
+	return creds.MustGet("OPENAI_API_KEY")
 }

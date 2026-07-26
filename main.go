@@ -13,6 +13,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/TrueBlocks/trueblocks-art/packages/creds"
 	"github.com/TrueBlocks/trueblocks-dalle/v6/pkg/prompt"
 	"github.com/TrueBlocks/trueblocks-dalle/v6/pkg/storage"
 )
@@ -43,9 +44,7 @@ func main() {
 	app := NewApp()
 
 	// Fail fast if required OpenAI key missing (before starting server)
-	if os.Getenv("OPENAI_API_KEY") == "" {
-		panic("OPENAI_API_KEY is required but not set. Please configure your OpenAI API key and try again.")
-	}
+	_ = creds.MustGet("OPENAI_API_KEY")
 
 	// Initialize circuit breaker for OpenAI
 	circuitBreaker := NewCircuitBreaker(5, 30*time.Second)

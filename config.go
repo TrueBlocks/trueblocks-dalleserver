@@ -1,12 +1,12 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"os"
-	"strings"
 	"sync"
 	"time"
+
+	"github.com/TrueBlocks/trueblocks-art/packages/creds"
 )
 
 // Config holds runtime configuration.
@@ -22,7 +22,6 @@ var cachedConfig Config
 // MustLoadConfig collects configuration from flags and environment.
 func MustLoadConfig() Config {
 	loadConfigOnce.Do(func() {
-		loadDotEnv()
 		var cfg Config
 		var portFlag string
 		var lockTTLStr string
@@ -44,7 +43,7 @@ func MustLoadConfig() Config {
 		}
 		cfg.SkipImage = os.Getenv("TB_DALLE_SKIP_IMAGE") == "1"
 		// Auto-enable skip (mock) if no API key present
-		if os.Getenv("OPENAI_API_KEY") == "" {
+		if !creds.Has("OPENAI_API_KEY") {
 			cfg.SkipImage = true
 		}
 		cfg.LockTTL = ttl
@@ -55,33 +54,4 @@ func MustLoadConfig() Config {
 		cachedConfig = cfg
 	})
 	return cachedConfig
-}
-
-// loadDotEnv loads key=value pairs from a local .env file (simple parser) if present.
-// Lines beginning with # are ignored. Keys already present in environment are not overwritten.
-func loadDotEnv() {
-	f, err := os.Open(".env")
-	if err != nil {
-		return
-	}
-	defer func() {
-		if err := f.Close(); err != nil {
-			// Log error or handle as appropriate for your application
-			_ = err
-		}
-	}()
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-		if eq := strings.Index(line, "="); eq > 0 {
-			k := strings.TrimSpace(line[:eq])
-			v := strings.TrimSpace(line[eq+1:])
-			if _, exists := os.LookupEnv(k); !exists {
-				_ = os.Setenv(k, strings.Trim(v, `"`))
-			}
-		}
-	}
 }
