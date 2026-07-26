@@ -19,11 +19,12 @@ jobs:
                   username: jrush
                   key: ${{ secrets.DEPLOY_SSH_KEY }}
                   script: |
-                      cd ~/Development/trueblocks-dalleserver
-                      git fetch origin ${{ github.ref_name }}
-                      git checkout ${{ github.ref_name }}
-                      git pull origin ${{ github.ref_name }}
-                      make build
-                      make build-book
+                      cd ~/Development/trueblocks-art
+                      git fetch origin
+                      git checkout main
+                      git pull origin main
+                      git submodule update --init --recursive
+                      make -C dalleserver build
+                      make -C dalleserver build-book
                       sudo systemctl restart dalleserver
                       sudo systemctl status dalleserver
