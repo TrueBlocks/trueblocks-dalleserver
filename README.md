@@ -77,19 +77,13 @@ http://localhost:8080/preview
 | `DALLESERVER_IMAGE_TIMEOUT` | Timeout for image request + download | `30s` |
 | `DALLE_QUALITY` | DALL·E quality parameter (`standard`, `hd`, etc.) | `standard` |
 
-Example (fish shell):
+The key is read from the shared credential store at
+`~/.config/trueblocks/credentials` (via the monorepo's `packages/creds`); the
+`OPENAI_API_KEY` environment variable also works. Inject it for a single run
+with:
 
 ```fish
-set -x OPENAI_API_KEY "sk-..."
-make run
-```
-
-Or use a local `.env` file (preferred for development):
-
-```bash
-cp .env.example .env
-edit .env  # populate OPENAI_API_KEY and options
-make run
+tb-exec --only OPENAI_API_KEY make run
 ```
 
 Offline/dev mode:
