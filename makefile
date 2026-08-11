@@ -51,3 +51,19 @@ book:
 build-book:
 	$(MAKE) -C book book
 
+
+MSG ?= update
+
+.PHONY: add commit push
+
+add:
+	@git add -A
+
+commit:
+	@git add -A
+	@git commit -m "$(MSG)" || true
+
+push:
+	@git add -A
+	@git commit -m "$(MSG)" || true
+	@git push
