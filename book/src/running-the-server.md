@@ -54,7 +54,7 @@ SIGINT / SIGTERM triggers a 10s graceful shutdown window via `http.Server.Shutdo
 | WriteTimeout | 60s | Response write bound. |
 | IdleTimeout | 120s | Keep-alive idle connections. |
 
-OpenAI enhancement gets its own context deadline (60s) inside `openai_client.go` with an additional client-level timeout buffer.
+OpenAI enhancement gets a per-attempt deadline (60s) inside `openai_client.go` with an additional client-level timeout buffer. The request itself, including the only retry loop, is carried by the shared `packages/ai` client; the server contributes policy — the circuit breaker, fallback to the original prompt, and metrics recorded per attempt.
 
 ## Status Printer
 
