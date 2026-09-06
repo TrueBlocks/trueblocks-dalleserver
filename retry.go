@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"math"
 	"time"
-
-	"github.com/TrueBlocks/trueblocks-dalle/v6/pkg/prompt"
 )
 
 // RetryConfig defines configuration for retry operations
@@ -112,18 +110,4 @@ func calculateBackoffDelay(config RetryConfig, attempt int) time.Duration {
 	}
 
 	return time.Duration(finalDelay)
-}
-
-// RetryableHTTPOperation wraps an HTTP operation with retry logic
-func RetryableHTTPOperation(config RetryConfig, requestID string, operation func() (int, error)) error {
-	return RetryWithBackoff(config, func() error {
-		statusCode, err := operation()
-		if err != nil {
-			if prompt.IsOpenAIRetryableError(err, statusCode) {
-				return fmt.Errorf("[%s] retryable error (status %d): %w", requestID, statusCode, err)
-			}
-			return fmt.Errorf("[%s] non-retryable error (status %d): %w", requestID, statusCode, err)
-		}
-		return nil
-	})
 }

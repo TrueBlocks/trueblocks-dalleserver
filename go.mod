@@ -4,12 +4,15 @@ module github.com/TrueBlocks/trueblocks-dalleserver
 go 1.25.1
 
 require (
+	github.com/TrueBlocks/trueblocks-art/packages/ai v0.0.0
 	github.com/TrueBlocks/trueblocks-art/packages/creds v0.0.0
 	github.com/TrueBlocks/trueblocks-dalle/v6 v6.6.6
 	github.com/google/uuid v1.6.0
 )
 
 replace github.com/TrueBlocks/trueblocks-art/packages/creds => ../packages/creds
+
+replace github.com/TrueBlocks/trueblocks-art/packages/ai => ../packages/ai
 
 require (
 	git.sr.ht/~sbinet/gg v0.7.0 // indirect

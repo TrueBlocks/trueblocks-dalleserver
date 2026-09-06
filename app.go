@@ -91,7 +91,7 @@ func isValidLegacyID(value string) bool {
 		return false
 	}
 	for _, char := range value[2:] {
-		if !((char >= '0' && char <= '9') || (char >= 'a' && char <= 'f')) {
+		if (char < '0' || char > '9') && (char < 'a' || char > 'f') {
 			return false
 		}
 	}

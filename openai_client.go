@@ -1,248 +1,138 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
+	"errors"
 	"fmt"
-	"io"
+	"net"
 	"net/http"
+	"sync"
 	"time"
 
+	"github.com/TrueBlocks/trueblocks-art/packages/ai"
 	"github.com/TrueBlocks/trueblocks-art/packages/creds"
-	"github.com/TrueBlocks/trueblocks-dalle/v6/pkg/prompt"
 )
 
-// Enhanced timeout constants
-var (
-	enhanceDeadline = 60 * time.Second
-)
+const openAIEnhancementModel = "gpt-4"
+const openAIEnhancementOperation = "openai_chat_completions"
 
-// OpenAIClient provides resilient OpenAI API operations
+var enhanceDeadline = 60 * time.Second
+
 type OpenAIClient struct {
 	httpClient     *http.Client
 	circuitBreaker *CircuitBreaker
 	retryConfig    RetryConfig
 	apiKey         string
+	model          string
+	endpoint       string
+	timeout        time.Duration
+	metrics        *MetricsCollector
 }
 
-// NewOpenAIClient creates a new resilient OpenAI client
 func NewOpenAIClient(apiKey string) *OpenAIClient {
 	return &OpenAIClient{
-		httpClient: &http.Client{
-			Timeout: enhanceDeadline + 10*time.Second, // Buffer beyond context timeout
-		},
+		httpClient:     &http.Client{Timeout: enhanceDeadline + 10*time.Second},
 		circuitBreaker: DefaultOpenAICircuitBreaker,
 		retryConfig:    OpenAIRetryConfig,
 		apiKey:         apiKey,
+		model:          openAIEnhancementModel,
+		timeout:        enhanceDeadline,
+		metrics:        GetMetricsCollector(),
 	}
 }
 
-// EnhancePromptWithResilience enhances a prompt with retry and circuit breaker protection
 func (c *OpenAIClient) EnhancePromptWithResilience(prmt, authorType, requestID string) (string, error) {
-	var result string
+	return c.EnhancePromptWithContext(context.Background(), prmt, authorType, requestID)
+}
 
-	operation := func() error {
-		enhanced, err := c.enhancePromptAttempt(prmt, authorType, requestID)
-		if err != nil {
+func (c *OpenAIClient) EnhancePromptWithContext(ctx context.Context, prmt, _ string, requestID string) (string, error) {
+	content := prmt
+	err := c.circuitBreaker.Execute(func() error {
+		if c.timeout <= 0 {
+			return context.DeadlineExceeded
+		}
+		spec, ok := ai.LookupModel(c.model)
+		if !ok || spec.Provider != ai.ProviderOpenAI || !spec.Writes {
+			return fmt.Errorf("unsupported enhancement model %q in shared registry", c.model)
+		}
+		seed, temperature := 1337, 0.2
+		attempts := max(1, c.retryConfig.MaxAttempts)
+		timeout := time.Duration(attempts)*c.timeout + time.Duration(attempts-1)*c.retryConfig.MaxDelay*5/4
+		provider := &ai.OpenAI{
+			APIKey: c.apiKey, HTTPClient: c.httpClient, ChatURL: c.endpoint,
+			MaxRetries: attempts, Pricing: ai.ProviderPricing(ai.ProviderOpenAI),
+			RetryDelay: func(attempt int) time.Duration { return calculateBackoffDelay(c.retryConfig, attempt) },
+			OnAttempt:  func(attempt int, _ *ai.Result, err error) { c.recordAttempt(attempt, err, requestID) },
+		}
+		start := time.Now()
+		result, err := provider.Call(ctx, c.model, "", ai.CallOptions{
+			System: prmt, SystemOnly: true, Seed: &seed, Temperature: &temperature,
+			MaxTokens: -1, Timeout: timeout, AttemptTimeout: c.timeout, RequestID: requestID,
+		})
+		if err != nil && !errors.Is(err, ai.ErrNoResponse) {
 			return err
 		}
-		result = enhanced
-		return nil
-	}
-
-	// Execute with circuit breaker
-	err := c.circuitBreaker.Execute(func() error {
-		// Execute with retry logic
-		return RetryableHTTPOperation(c.retryConfig, requestID, func() (int, error) {
-			if err := operation(); err != nil {
-				// Extract status code if available
-				if apiErr, ok := err.(*prompt.OpenAIAPIError); ok {
-					return apiErr.StatusCode, err
-				}
-				return 0, err
+		if result.UsageReported {
+			if err := ai.RecordCall("dalleserver", result, time.Since(start).Seconds()); err != nil {
+				logInfo("record enhancement usage", "error", err)
 			}
-			return 200, nil
-		})
-	})
-
-	if err != nil {
-		// Check if circuit breaker blocked the request
-		if cbErr, ok := err.(*CircuitBreakerError); ok && cbErr.IsCircuitBreakerOpen() {
-			logInfo(fmt.Sprintf("[%s] OpenAI circuit breaker is open, using non-enhanced prompt", requestID))
-			return prmt, nil // Graceful degradation
 		}
-
-		// Log error but return original prompt for graceful degradation
-		logInfo(fmt.Sprintf("[%s] OpenAI enhancement failed, using original prompt", requestID), "error", err)
+		if result.Content != "" {
+			content = result.Content
+		}
+		return nil
+	})
+	c.metrics.UpdateCircuitBreakerMetrics(c.circuitBreaker.GetMetrics())
+	if err != nil {
+		logInfo(fmt.Sprintf("[%s] OpenAI enhancement unavailable, using original prompt", requestID), "error", err)
 		return prmt, nil
 	}
-
-	return result, nil
-}
-
-// enhancePromptAttempt performs a single attempt to enhance a prompt
-func (c *OpenAIClient) enhancePromptAttempt(prmt, authorType, requestID string) (string, error) {
-	_ = authorType // delint
-	url := "https://api.openai.com/v1/chat/completions"
-
-	payload := map[string]interface{}{
-		"model":       "gpt-4",
-		"temperature": 0.2,
-		"seed":        1337,
-		"messages": []map[string]string{
-			{"role": "system", "content": prmt},
-		},
-	}
-
-	payloadBytes, err := json.Marshal(payload)
-	if err != nil {
-		return "", fmt.Errorf("marshal request: %w", err)
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), enhanceDeadline)
-	defer cancel()
-
-	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(payloadBytes))
-	if err != nil {
-		return "", fmt.Errorf("create request: %w", err)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+c.apiKey)
-	req.Header.Set("X-Request-ID", requestID)
-
-	start := time.Now()
-	logInfo(fmt.Sprintf("[%s] OpenAI enhance request starting", requestID))
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		GetMetricsCollector().RecordOpenAIRequest(false, false, requestID)
-		GetMetricsCollector().RecordError("OPENAI_ERROR", "openai_chat_completions", requestID)
-		return "", &prompt.OpenAIAPIError{
-			Message:    fmt.Sprintf("HTTP request failed: %v", err),
-			StatusCode: 0,
-			RequestID:  requestID,
-		}
-	}
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			// Log error or handle as appropriate for your application
-			_ = err
-		}
-	}()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		GetMetricsCollector().RecordOpenAIRequest(false, false, requestID)
-		GetMetricsCollector().RecordError("OPENAI_ERROR", "openai_chat_completions", requestID)
-		return "", &prompt.OpenAIAPIError{
-			Message:    fmt.Sprintf("read response body: %v", err),
-			StatusCode: resp.StatusCode,
-			RequestID:  requestID,
-		}
-	}
-
-	duration := time.Since(start)
-	logInfo(fmt.Sprintf("[%s] OpenAI enhance request completed", requestID),
-		"durMs", duration.Milliseconds(), "status", resp.StatusCode)
-
-	if resp.StatusCode != http.StatusOK {
-		// Truncate long error responses
-		errorBody := string(body)
-		if len(errorBody) > 512 {
-			errorBody = errorBody[:512] + "..."
-		}
-		GetMetricsCollector().RecordOpenAIRequest(false, resp.StatusCode == http.StatusGatewayTimeout, requestID)
-		GetMetricsCollector().RecordError("OPENAI_ERROR", "openai_chat_completions", requestID)
-		return "", &prompt.OpenAIAPIError{
-			Message:    fmt.Sprintf("OpenAI API error: %s", errorBody),
-			StatusCode: resp.StatusCode,
-			RequestID:  requestID,
-		}
-	}
-
-	// Parse response
-	type dalleResponse struct {
-		Choices []struct {
-			Message struct {
-				Content string `json:"content"`
-			} `json:"message"`
-		} `json:"choices"`
-		Error *struct {
-			Message string `json:"message"`
-			Type    string `json:"type"`
-			Code    string `json:"code"`
-		} `json:"error,omitempty"`
-	}
-
-	var response dalleResponse
-	if err := json.Unmarshal(body, &response); err != nil {
-		GetMetricsCollector().RecordOpenAIRequest(false, false, requestID)
-		GetMetricsCollector().RecordError("OPENAI_ERROR", "openai_chat_completions", requestID)
-		return "", &prompt.OpenAIAPIError{
-			Message:    fmt.Sprintf("parse response: %v", err),
-			StatusCode: resp.StatusCode,
-			RequestID:  requestID,
-		}
-	}
-
-	if response.Error != nil {
-		GetMetricsCollector().RecordOpenAIRequest(false, false, requestID)
-		// Use error code if present, otherwise fallback to OPENAI_ERROR
-		errorCode := response.Error.Code
-		if errorCode == "" {
-			errorCode = "OPENAI_ERROR"
-		}
-		GetMetricsCollector().RecordError(errorCode, "openai_chat_completions", requestID)
-		return "", &prompt.OpenAIAPIError{
-			Message:    fmt.Sprintf("OpenAI API error: %s", response.Error.Message),
-			StatusCode: resp.StatusCode,
-			RequestID:  requestID,
-		}
-	}
-
-	if len(response.Choices) == 0 {
-		logInfo(fmt.Sprintf("[%s] OpenAI returned no choices", requestID))
-		return prmt, nil // Return original
-	}
-
-	content := response.Choices[0].Message.Content
-	if content == "" {
-		logInfo(fmt.Sprintf("[%s] OpenAI returned empty content", requestID))
-		return prmt, nil // Return original
-	}
-
-	logInfo(fmt.Sprintf("[%s] OpenAI enhancement successful", requestID),
-		"originalLen", len(prmt), "enhancedLen", len(content))
-	GetMetricsCollector().RecordOpenAIRequest(true, false, requestID)
-
 	return content, nil
 }
 
-// GetCircuitBreakerMetrics returns current circuit breaker metrics
+func (c *OpenAIClient) recordAttempt(attempt int, err error, requestID string) {
+	if attempt > 1 {
+		c.metrics.RecordRetry(openAIEnhancementOperation, requestID)
+	}
+	success := err == nil || errors.Is(err, ai.ErrNoResponse)
+	timeout := errors.Is(err, context.DeadlineExceeded)
+	code := "OPENAI_ERROR"
+	var apiErr *ai.APIError
+	if errors.As(err, &apiErr) {
+		timeout = timeout || apiErr.StatusCode == http.StatusGatewayTimeout
+		if apiErr.Code != "" {
+			code = apiErr.Code
+		}
+		if apiErr.RequestID != "" {
+			logInfo(fmt.Sprintf("[%s] OpenAI attempt completed", requestID), "providerRequestID", apiErr.RequestID, "attempt", attempt)
+		}
+	}
+	var netErr net.Error
+	if errors.As(err, &netErr) {
+		timeout = timeout || netErr.Timeout()
+	}
+	c.metrics.RecordOpenAIRequest(success, timeout, requestID)
+	if !success {
+		c.metrics.RecordError(code, openAIEnhancementOperation, requestID)
+	}
+}
+
 func (c *OpenAIClient) GetCircuitBreakerMetrics() CircuitBreakerMetrics {
 	return c.circuitBreaker.GetMetrics()
 }
 
-// ResetCircuitBreaker manually resets the circuit breaker
 func (c *OpenAIClient) ResetCircuitBreaker() {
 	c.circuitBreaker.Reset()
 }
 
-// Global OpenAI client instance
-var globalOpenAIClient *OpenAIClient
+var globalOpenAIClient = sync.OnceValue(func() *OpenAIClient {
+	return NewOpenAIClient(getOpenAIAPIKey())
+})
 
-// GetOpenAIClient returns the global OpenAI client, creating it if necessary
 func GetOpenAIClient() *OpenAIClient {
-	if globalOpenAIClient == nil {
-		apiKey := getOpenAIAPIKey() // Need to implement this
-		globalOpenAIClient = NewOpenAIClient(apiKey)
-	}
-	return globalOpenAIClient
+	return globalOpenAIClient()
 }
 
-// getOpenAIAPIKey retrieves the OpenAI API key from the credentials file.
 func getOpenAIAPIKey() string {
 	return creds.MustGet("OPENAI_API_KEY")
 }
