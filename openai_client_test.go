@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -28,6 +29,13 @@ func enhanceResponse(status int, body string) *http.Response {
 func enhancementClient(t *testing.T, transport enhanceTransport) *OpenAIClient {
 	t.Helper()
 	t.Setenv("TRUEBLOCKS_DATA_DIR", t.TempDir())
+	catalog, err := os.ReadFile(filepath.Join("testdata", "models.json"))
+	if err != nil {
+		t.Fatalf("reading the test model catalog: %v", err)
+	}
+	if err := os.WriteFile(ai.ModelsPath(), catalog, 0644); err != nil {
+		t.Fatalf("seeding the test model catalog: %v", err)
+	}
 	c := NewOpenAIClient("fake")
 	c.httpClient = &http.Client{Transport: transport}
 	c.endpoint = "https://fixture.invalid/enhance"
