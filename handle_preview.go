@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', initializeGridControl);
 <footer style="padding:0 1.2rem;margin-top:2rem;font-size:.65rem;color:#888;text-align:center">Generated at {{.Now.Format "2006-01-02 15:04:05 MST"}} • Found {{len .Images}} images.</footer>
 </body></html>`))
 
-func (a *App) handlePreview(w http.ResponseWriter, r *http.Request) {
+func (a *App) handlePreview(w http.ResponseWriter, _ *http.Request) {
 	root := storage.OutputDir()
 	var images []imageMeta
 	_ = filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {

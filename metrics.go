@@ -132,7 +132,7 @@ func (mc *MetricsCollector) RecordRetry(operation, requestID string) {
 }
 
 // RecordResponseTime records a response time measurement
-func (mc *MetricsCollector) RecordResponseTime(durationMs int64, requestID string) {
+func (mc *MetricsCollector) RecordResponseTime(durationMs int64, _ string) {
 	mc.metrics.mu.Lock()
 	defer mc.metrics.mu.Unlock()
 
@@ -166,7 +166,7 @@ func (mc *MetricsCollector) RecordResponseTime(durationMs int64, requestID strin
 }
 
 // RecordOpenAIRequest records an OpenAI API request
-func (mc *MetricsCollector) RecordOpenAIRequest(success bool, timeout bool, requestID string) {
+func (mc *MetricsCollector) RecordOpenAIRequest(success bool, timeout bool, _ string) {
 	mc.metrics.mu.Lock()
 	defer mc.metrics.mu.Unlock()
 
@@ -181,7 +181,7 @@ func (mc *MetricsCollector) RecordOpenAIRequest(success bool, timeout bool, requ
 }
 
 // RecordFileOperation records a file system operation
-func (mc *MetricsCollector) RecordFileOperation(success bool, requestID string) {
+func (mc *MetricsCollector) RecordFileOperation(success bool, _ string) {
 	mc.metrics.mu.Lock()
 	defer mc.metrics.mu.Unlock()
 
