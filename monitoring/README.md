@@ -88,4 +88,4 @@ docker-compose down
 docker exec monitoring_grafana_1 backup
 ```
 
-![README infographic](README-infographic.png)
+![README infographic](README-infographic.jpg)

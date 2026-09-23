@@ -14,4 +14,4 @@ This mini-book documents ONLY what exists in this repository (excluding the vend
 9. [Testing](./src/testing.md)
 10. [References](./src/references.md)
 
-![README infographic](README-infographic.png)
+![README infographic](README-infographic.jpg)

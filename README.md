@@ -256,4 +256,4 @@ Thanks to:
 * [@mikeghen](https://github.com/mikeghen)
 * And the broader TrueBlocks community
 
-![README infographic](README-infographic.png)
+![README infographic](README-infographic.jpg)
