@@ -153,7 +153,7 @@ Derived sub-directories (created automatically):
   series/          # JSON series definition files
 ```
 
-The server fails fast on startup if the data directory cannot be created or written.
+The server attempts to create the output directory on startup; a failure to create it is currently ignored rather than aborting startup.
 
 ## Direct library usage
 
