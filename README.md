@@ -80,7 +80,9 @@ http://localhost:8080/preview
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `OPENAI_API_KEY` | Key for enhancement + DALL·E image calls (absence forces skip/mock mode) | (none) |
+| `ANTHROPIC_API_KEY`, `GEMINI_API_KEY` | Keys for the default enhancement (Opus 5.5) and image (Gemini Pro Image) models; `OPENAI_API_KEY` when the OpenAI models are chosen. A missing key the configured models need forces skip/mock mode | (none) |
+| `TB_DALLE_SPEND` | Model tier (`cheap` or `pro`) whose registry rows pick the enhancement and image models | `pro` |
+| `TB_DALLE_ENHANCEMENT_MODEL`, `TB_DALLE_IMAGE_MODEL` | Name either model outright; `gpt-5.5` and `gpt-image-2` restore the OpenAI path | unset |
 | `TB_DALLE_PORT` | Overrides `--port` | unset |
 | `TB_DALLE_SKIP_IMAGE` | `1` to skip actual image generation (offline / fast tests) | unset |
 | `TB_DALLE_NO_ENHANCE` | `1` to disable LLM enhancement (use raw prompt) | unset |
@@ -196,7 +198,6 @@ Key server concerns illustrated here:
 * Per-(series,address) locking + TTL to avoid duplicate work
 * Simple context + prompt caching inside the `trueblocks-dalle` library
 * Timeouts on enhancement + image requests (configurable)
-* Circuit breaker + retry wrapper around OpenAI enhancement, falling back to the original prompt
 * Prompt + image phase logging (start/end + elapsed)
 * Atomic file writes (temp + rename) with retry in `RobustFileOperations`
 * Lint (golangci-lint) pinned version for reproducibility
@@ -226,7 +227,7 @@ make bench-baseline
 
 | Symptom | Likely Cause | Fix |
 |---------|--------------|-----|
-| Server starts in mock mode / no real images | Missing key (skip mode auto-enabled) | Provide `OPENAI_API_KEY` via the creds store or environment |
+| Server starts in mock mode / no real images | Missing key (skip mode auto-enabled) | Provide the configured models' keys (Anthropic and Gemini by default) via the creds store or environment |
 | Enhancement timeout | Model slow / low timeout | Increase `TB_DALLE_ENHANCE_TIMEOUT` |
 | Blank preview page | No images yet | Trigger generation (`?generate=1`) |
 | 404 under `/files/` | File not generated yet | Wait for generation to complete |

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/TrueBlocks/trueblocks-art/packages/creds"
+	"github.com/TrueBlocks/trueblocks-dalle/v6/pkg/prompt"
 )
 
 // Config holds runtime configuration.
@@ -42,9 +43,15 @@ func MustLoadConfig() Config {
 			cfg.Port = ":" + envPort
 		}
 		cfg.SkipImage = os.Getenv("TB_DALLE_SKIP_IMAGE") == "1"
-		// Auto-enable skip (mock) if no API key present
-		if !creds.Has("OPENAI_API_KEY") {
+		// Auto-enable skip (mock) if a key the configured models need is absent
+		keys, err := prompt.DefaultAiConfiguration().ProviderKeys()
+		if err != nil {
 			cfg.SkipImage = true
+		}
+		for _, key := range keys {
+			if !creds.Has(key) {
+				cfg.SkipImage = true
+			}
 		}
 		cfg.LockTTL = ttl
 

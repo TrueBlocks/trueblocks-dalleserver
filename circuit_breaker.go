@@ -58,9 +58,6 @@ func NewCircuitBreaker(failureThreshold int, resetTimeout time.Duration) *Circui
 	}
 }
 
-// DefaultOpenAICircuitBreaker creates a circuit breaker optimized for OpenAI API
-var DefaultOpenAICircuitBreaker = NewCircuitBreaker(5, 60*time.Second)
-
 // Execute runs the given operation through the circuit breaker
 func (cb *CircuitBreaker) Execute(operation func() error) error {
 	cb.mu.Lock()

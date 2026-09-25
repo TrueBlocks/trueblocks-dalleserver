@@ -8,8 +8,6 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
-	"strconv"
-	"strings"
 	"syscall"
 	"time"
 
@@ -43,8 +41,21 @@ func fileExists(path string) bool {
 func main() {
 	app := NewApp()
 
-	// Fail fast if required OpenAI key missing (before starting server)
-	_ = creds.MustGet("OPENAI_API_KEY")
+	// Fail fast, before starting the server, if a key the configured models
+	// need is missing — the enhancement model's company's and the image
+	// model's (Anthropic and Gemini on the pro default, OpenAI with
+	// TB_DALLE_ENHANCEMENT_MODEL=gpt-5.5 and TB_DALLE_IMAGE_MODEL=gpt-image-2).
+	models := prompt.DefaultAiConfiguration()
+	if err := models.CheckModels(); err != nil {
+		stdlog.Fatalf("choosing models: %v", err)
+	}
+	keys, err := models.ProviderKeys()
+	if err != nil {
+		stdlog.Fatalf("choosing models: %v", err)
+	}
+	for _, key := range keys {
+		_ = creds.MustGet(key)
+	}
 
 	// Initialize circuit breaker for OpenAI
 	circuitBreaker := NewCircuitBreaker(5, 30*time.Second)
@@ -78,7 +89,7 @@ func main() {
 
 	startStatusPrinter(0)
 
-	port := getPort()
+	port := app.Config.Port
 	srv := &http.Server{
 		Addr:              port,
 		Handler:           mux,
@@ -92,7 +103,9 @@ func main() {
 	go func() {
 		logInfo(fmt.Sprintf("Starting server on %s", port))
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logInfo(fmt.Sprintf("Server error: %v", err))
+			// A server that cannot listen must exit, so launchd sees the
+			// failure instead of a live process serving nothing.
+			stdlog.Fatalf("Server error: %v", err)
 		}
 	}()
 
@@ -104,23 +117,6 @@ func main() {
 	if err := srv.Shutdown(ctx); err != nil {
 		_ = srv.Close()
 	}
-}
-
-func getPort() string {
-	port := ":8080"
-	if len(os.Args) > 1 && strings.Contains(os.Args[1], "--port=") {
-		isNumeric := func(s string) bool {
-			_, err := strconv.ParseFloat(s, 64)
-			return err == nil
-		}
-		n := strings.ReplaceAll(os.Args[1], "--port=", "")
-		if !isNumeric(n) {
-			fmt.Fprintln(os.Stderr, "WARNING: invalid port number, falling back to :8080 =>", n)
-		} else {
-			port = ":" + n
-		}
-	}
-	return port
 }
 
 // Build-time variables (set via ldflags during build)

@@ -23,14 +23,6 @@ var DefaultRetryConfig = RetryConfig{
 	BackoffFactor: 2.0,
 }
 
-// OpenAIRetryConfig provides specific retry settings for OpenAI API calls
-var OpenAIRetryConfig = RetryConfig{
-	MaxAttempts:   3,
-	BaseDelay:     2 * time.Second,
-	MaxDelay:      60 * time.Second,
-	BackoffFactor: 2.0,
-}
-
 // RetryableError represents an error that can be retried
 type RetryableError struct {
 	Err       error
