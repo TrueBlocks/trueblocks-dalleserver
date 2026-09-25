@@ -90,9 +90,9 @@ http://localhost:8080/preview
 | `TB_DALLE_IMAGE_TIMEOUT` | Timeout for image request + download | `30s` |
 | `DALLE_QUALITY` | DALL·E quality parameter (`standard`, `hd`, etc.) | `standard` |
 
-The key is read from the shared credential store at
+Each key the configured models need is read from the shared credential store at
 `~/.config/trueblocks/credentials` (via the monorepo's `packages/creds`); the
-`OPENAI_API_KEY` environment variable also works. Inject it for a single run
+matching environment variable also works. Inject a key for a single run
 with:
 
 ```fish
