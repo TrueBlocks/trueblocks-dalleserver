@@ -30,6 +30,8 @@ type HealthCheck struct {
 	Status     HealthStatus               `json:"status"`
 	Timestamp  time.Time                  `json:"timestamp"`
 	Version    string                     `json:"version"`
+	BuildTime  string                     `json:"build_time"`
+	Commit     string                     `json:"commit"`
 	Uptime     time.Duration              `json:"uptime_seconds"`
 	Components map[string]ComponentHealth `json:"components"`
 	System     SystemHealth               `json:"system"`
@@ -98,7 +100,9 @@ func (hc *HealthChecker) CheckHealth(requestID string) HealthCheck {
 	return HealthCheck{
 		Status:     overallStatus,
 		Timestamp:  time.Now(),
-		Version:    "1.0.0", // This could be injected from build info
+		Version:    Version,
+		BuildTime:  BuildTime,
+		Commit:     BuildCommit,
 		Uptime:     time.Since(hc.startTime),
 		Components: components,
 		System: SystemHealth{

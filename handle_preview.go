@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', initializeGridControl);
   <p>No annotated images found yet. Trigger generation via /dalle/&lt;series&gt;/&lt;address&gt;?generate=1</p>
   </main>
 {{end}}
-<footer style="padding:0 1.2rem;margin-top:2rem;font-size:.65rem;color:#888;text-align:center">Generated at {{.Now.Format "2006-01-02 15:04:05 MST"}} • Found {{len .Images}} images.</footer>
+<footer style="padding:0 1.2rem;margin-top:2rem;font-size:.65rem;color:#888;text-align:center">Generated at {{.Now.Format "2006-01-02 15:04:05 MST"}} • Found {{len .Images}} images. • Built {{.BuildTime}} ({{.Commit}}).</footer>
 </body></html>`))
 
 func (a *App) handlePreview(w http.ResponseWriter, _ *http.Request) {
@@ -167,11 +167,12 @@ func (a *App) handlePreview(w http.ResponseWriter, _ *http.Request) {
 	}
 	sort.Strings(keys)
 	data := struct {
-		Images   []imageMeta
-		BySeries map[string][]imageMeta
-		Series   []string
-		Now      time.Time
-	}{Images: images, BySeries: bySeries, Series: keys, Now: time.Now()}
+		Images            []imageMeta
+		BySeries          map[string][]imageMeta
+		Series            []string
+		Now               time.Time
+		BuildTime, Commit string
+	}{Images: images, BySeries: bySeries, Series: keys, Now: time.Now(), BuildTime: BuildTime, Commit: BuildCommit}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := previewTpl.Execute(w, data); err != nil {
 		requestID := GenerateRequestID()
