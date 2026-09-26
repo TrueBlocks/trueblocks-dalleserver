@@ -23,13 +23,14 @@ type imageMeta struct {
 var previewTpl = template.Must(template.New("preview").Parse(`<!DOCTYPE html>
 <html><head><meta charset="utf-8" />
 <title>DalleServer Preview</title>
+<link rel="stylesheet" href="/__tb__/nav.css">
 <style>
 :root {
   --grid-columns: 4;
 }
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;padding:0;background:#111;color:#eee;padding-top:80px}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;padding:0;background:#111;color:#eee}
 h1{margin-top:0;font-size:1.4rem}
-header{position:fixed;top:0;left:0;right:0;z-index:1000;background:#111;border-bottom:1px solid #333;display:flex;align-items:center;gap:1rem;padding:1.2rem;flex-wrap:wrap}
+header{position:sticky;top:0;z-index:1000;background:#111;border-bottom:1px solid #333;display:flex;align-items:center;gap:1rem;padding:1.2rem;flex-wrap:wrap}
 .controls{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
 .grid-control{display:flex;align-items:center;gap:0.5rem}
 .grid-control label{font-size:0.8rem;color:#ccc}
@@ -81,6 +82,7 @@ function initializeGridControl() {
 document.addEventListener('DOMContentLoaded', initializeGridControl);
 </script>
 </head><body>
+<script src="/__tb__/nav.js"></script>
 <header>
   <h1>Annotated Image Preview</h1>
   <div class="controls">

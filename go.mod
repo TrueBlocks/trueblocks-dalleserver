@@ -17,6 +17,7 @@ require (
 	git.sr.ht/~sbinet/gg v0.7.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProjectZKM/Ziren/crates/go-runtime/zkvm_runtime v0.0.0-20251208031133-be43a854e4be // indirect
+	github.com/TrueBlocks/trueblocks-art/packages/appd v0.0.0-00010101000000-000000000000
 	github.com/TrueBlocks/trueblocks-chifra/v6 v6.6.6-0.20251201032710-ec810bb48eb0 // indirect
 	github.com/TrueBlocks/trueblocks-sdk/v6 v6.6.5 // indirect
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
@@ -87,3 +88,5 @@ require (
 	google.golang.org/protobuf v1.36.10 // indirect
 	lukechampine.com/blake3 v1.4.1 // indirect
 )
+
+replace github.com/TrueBlocks/trueblocks-art/packages/appd => ../packages/appd

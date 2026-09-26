@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/TrueBlocks/trueblocks-art/packages/appd"
 	"github.com/TrueBlocks/trueblocks-art/packages/creds"
 	"github.com/TrueBlocks/trueblocks-dalle/v6/pkg/prompt"
 	"github.com/TrueBlocks/trueblocks-dalle/v6/pkg/storage"
@@ -66,6 +67,12 @@ func main() {
 	printStartupReport()
 
 	mux := http.NewServeMux()
+
+	// The shared nav bar links the local daemons. With no daemons.json, as on
+	// the remote server, the bar is not drawn.
+	if _, err := appd.RegisterNav(mux, appd.DefaultConfigPath()); err != nil {
+		stdlog.Fatalf("registering nav: %v", err)
+	}
 
 	// Apply middleware to all handlers
 	mux.HandleFunc("/", WrapWithMiddleware(app.handleDefault, circuitBreaker))
